@@ -8,7 +8,7 @@
 Nous sommes 3 étudiants en Master Miage Apprentissage. Voici nos informations : 
 
 | Nom et prénom | Compte développeur (GitHub/GitLab) |
-|---|---|---|
+|---|---|
 | Amal Benatallah | Amalbenatallah | 
 | Adam Bendjebbar | AdamBendjebbar | 
 | Assia Ferradj | AssFrdz | 
