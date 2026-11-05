@@ -11,7 +11,6 @@ Nous sommes trois apprentis en première année de master MIAGE et nous construi
 
 | Membre | Compte GitHub | Email des commits | Fil rouge |
 |---|---|---|---|
-| Amal BENATALLAH | [@Amalbenatallah](https://github.com/Amalbenatallah) | 42005281@parisnanterre.fr | La donnée produit et son histoire |
 | Adam BENDJEBBAR | [@AdamBendjebbar](https://github.com/AdamBendjebbar) | 43006224@parisnanterre.fr | Le juste prix et le budget |
 | Assia FERRADJ | [@AssFrdz](https://github.com/AssFrdz) | 45008425@parisnanterre.fr | La décision d'achat |
 
