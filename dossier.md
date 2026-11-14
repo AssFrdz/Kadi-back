@@ -2,7 +2,7 @@
 
 *Les bons comptes font les bonnes courses.*
 
-**Dossier de lancement** · M1 MIAGE Apprentissage · Université Paris Nanterre · rendu R1 du 20 octobre 2026  
+**Dossier de lancement** · M1 MIAGE Apprentissage · Université Paris Nanterre · rendu R1 du 20 octobre 2026 · v0.1.2  
 Amal BENATALLAH, Adam BENDJEBBAR, Assia FERRADJ
 
 ## 01 Équipe, comptes développeurs et dépôt
