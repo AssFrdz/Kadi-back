@@ -20,13 +20,13 @@ Chaque membre porte une feature par version (section 04) et a vérifié que son 
 **Nos dépôts.** Le dépôt principal contient le serveur et ce dossier dans `/doc`.  
 Dépôt principal : <https://github.com/AssFrdz/Kadi-back>  
 Front : <https://github.com/AssFrdz/Kadi-front>  
-Page de projet, publiée avec GitHub Pages à la livraison v0.1.0 : <https://assfrdz.github.io/Kadi-back/>
+La publication du dossier avec GitHub Pages est prévue pour le rendu 2. Le lien sera communiqué une fois la mise en ligne vérifiée.
 
 ## 02 Projet et caractère innovant
 
 **Le constat.** Samedi matin, au rayon petit-déjeuner. Une mère de famille compare deux paquets de céréales, tente une règle de trois de tête, s'arrête devant une étiquette « −25 % », puis repose tout et reprend sa marque habituelle. Elle n'a rien d'une cliente distraite. Il lui manque une information que personne ne lui donne, et le temps de la chercher.
 
-Depuis 2021, le prix des courses est devenu un sujet de tension dans beaucoup de foyers. En avril 2023, les prix alimentaires dépassaient déjà de 21 % leur niveau moyen de 2019 (Insee). Aujourd'hui encore, un panier représentatif de 150 € coûte une vingtaine d'euros de plus selon l'enseigne (palmarès UFC-Que Choisir de septembre 2026). Les ménages comparent donc, et souvent beaucoup. Trois mécanismes leur échappent pourtant, parce qu'aucun ne se lit sur l'étiquette.
+Depuis 2021, le prix des courses est devenu un sujet de tension dans beaucoup de foyers. En avril 2023, les prix alimentaires dépassaient déjà de 21 % leur niveau moyen de 2019 (Insee). Aujourd'hui encore, un panier représentatif de 150 € coûte une vingtaine d'euros de plus selon l'enseigne (palmarès UFC-Que Choisir de septembre 2026, voir références en section 09). Les ménages comparent donc, et souvent beaucoup. Trois mécanismes leur échappent pourtant, parce qu'aucun ne se lit sur l'étiquette.
 
 **La réduflation.** Un paquet de biscuits passe de 200 g à 180 g sans changer de prix. Le prix au kilo vient d'augmenter de 200 ÷ 180 − 1, soit 11,1 %. Depuis juillet 2024, les magasins de plus de 400 m² doivent le signaler, mais pendant deux mois seulement. Passé ce délai, plus rien ne le rappelle.
 
@@ -40,15 +40,17 @@ Les outils qui existent, comparateur d'enseigne, palmarès national ou base ouve
 
 | Ce qui existe | Ce que fait Kadi | Le calcul derrière |
 |---|---|---|
-| Afficher un prix relevé | Donne un prix de référence qu'une erreur de saisie ne peut pas fausser, avec sa confiance et ses relevés | médiane pondérée, écart absolu médian |
-| Comparer le prix d'un produit | Ne garde que les magasins qui valent le coup et montre leur compromis : le moins cher, le plus proche, le prix le plus sûr | front de Pareto |
-| Afficher une promotion | Confronte le prix de référence annoncé au plus bas prix relevé sur les 30 jours précédents, et calcule ce qu'une offre « 2e à −50 % » rapporte vraiment par unité | minimum glissant sur 30 jours, prix unitaire effectif |
-| Comparer des paniers | Cherche où acheter la liste réelle du ménage sous contraintes (nombre de magasins, temps, voiture ou non) et affiche l'économie nette | Σ prix + trajet minimal (Held–Karp) |
-| Suivre ses dépenses | Mesure l'inflation propre au ménage, rayon par rayon, et repère la réduflation même quand le code-barres change avec la quantité | indices de Laspeyres et de Fisher chaînés |
-| Proposer moins cher | Propose une alternative en disant ce qui change (quantité, composition, prix unitaire), sans jamais remplacer un article sans accord | contraintes + sac à dos à choix multiples |
-| Surveiller un prix | Prévient quand un produit habituel baisse durablement, pas pour une promotion d'un jour | médiane glissante, CUSUM |
+| Open Prices : relevés de prix collaboratifs | Donne un prix de référence qu'une erreur de saisie ne peut pas fausser, avec sa confiance et ses relevés | médiane pondérée, écart absolu médian |
+| Sites de drive des enseignes, par exemple E.Leclerc Drive | Ne garde que les magasins qui valent le coup et montre leur compromis : le moins cher, le plus proche, le prix le plus sûr | front de Pareto |
+| Sites de drive des enseignes : affichage des promotions | Confronte le prix de référence annoncé au plus bas prix relevé sur les 30 jours précédents, et calcule ce qu'une offre « 2e à −50 % » rapporte vraiment par unité | minimum glissant sur 30 jours, prix unitaire effectif |
+| Google Maps : estimation d'itinéraires | Cherche où acheter la liste réelle du ménage sous contraintes (nombre de magasins, temps, voiture ou non) et affiche l'économie nette | Σ prix + trajet minimal (Held–Karp) |
+| Insee : indice des prix à la consommation | Mesure l'inflation propre au ménage, rayon par rayon, et repère la réduflation même quand le code-barres change avec la quantité | indices de Laspeyres et de Fisher chaînés |
+| Open Food Facts : fiches et composition des produits | Propose une alternative en disant ce qui change (quantité, composition, prix unitaire), sans jamais remplacer un article sans accord | contraintes + sac à dos à choix multiples |
+| Open Prices : historique des relevés | Prévient quand un produit habituel baisse durablement, pas pour une promotion d'un jour | médiane glissante, CUSUM |
 
-**Positionnement.** Kadi s'adresse d'abord aux ménages qui comptent chaque euro sans avoir le temps de tout vérifier : familles monoparentales, retraités, étudiants, actifs qui font leurs courses en drive. Sa promesse est simple, payer le juste prix et savoir pourquoi. Aucune enseigne ne pourra payer pour être mieux placée, car notre crédibilité repose entièrement sur cette indépendance. L'application restera gratuite pour les ménages. Le modèle économique que nous voulons tester d'ici la v1.0.0 vise les structures qui les accompagnent, CCAS, épiceries solidaires, associations ou comités d'entreprise, avec un suivi du coût d'un panier de référence sur leur territoire. Nous le confronterons à une dizaine d'entretiens avant d'y consacrer du code.
+**Positionnement.** Kadi s'adresse d'abord aux ménages qui comptent chaque euro sans avoir le temps de tout vérifier : familles monoparentales, retraités, étudiants, actifs qui font leurs courses en drive. Sa promesse est simple, payer le juste prix et savoir pourquoi. Le socle de comparaison restera gratuit. Deux pistes de revenus seront étudiées : un sponsoring individuel permettant à un magasin d'apparaître en tête dans un emplacement clairement identifié comme « Sponsorisé », et une offre premium proposant des fonctionnalités avancées. La mise en avant sponsorisée restera distincte du classement organique et ne modifiera ni ses critères ni ses résultats. Nous étudierons aussi une offre de suivi d'un panier de référence pour les structures qui accompagnent les ménages, comme les CCAS ou les associations. Ces pistes seront confrontées à une dizaine d'entretiens avant tout développement.
+
+**Inflation et budget du ménage.** L'indice d'inflation personnelle mesure l'évolution du prix d'un panier d'achats ; il ne nécessite pas le salaire. Le ménage pourra, s'il le souhaite, renseigner ses revenus, dont le salaire, et ses dépenses récurrentes pour estimer son budget disponible. Ces montants restent facultatifs et distincts du calcul de l'inflation.
 
 **La donnée d'abord.** Le défi de Kadi tient moins au code qu'à la qualité des prix. Chaque prix affiché porte sa source et sa date, et le catalogue de démonstration est présenté comme tel. Les prix proviennent de sources autorisées, la base ouverte Open Prices et les tickets de caisse que les utilisateurs choisissent de partager, branchées derrière une même interface pour qu'aucune ne soit indispensable. Les fiches produits viennent d'Open Food Facts et les indices nationaux de l'Insee. Aucun prix ne repose sur un relevé isolé : chacun est confronté aux autres relevés du même produit avant d'être affiché.
 
@@ -84,6 +86,8 @@ Chaque scénario part d'une situation vécue par un ménage et désigne la featu
 
 Une feature a un effet sur la BD, le back, l'API REST et le front. Chaque feature est portée par une seule personne, repose sur un algorithme identifié et dispose de sa fiche dans `doc/features/`. Chaque algorithme est comparé à une solution de référence exhaustive sur de petites instances.
 
+Chaque fiche de feature précisera son impact sur le modèle de données et les migrations Flyway nécessaires. Le schéma est versionné par des migrations incrémentales ; une feature peut en nécessiter plusieurs.
+
 | Version | Amal BENATALLAH | Adam BENDJEBBAR | Assia FERRADJ |
 |---|---|---|---|
 | **v0.1.0** 24/11 | **F3 · Où acheter ce produit**<br>front de Pareto sur le prix unitaire, la distance et la confiance du prix, ε-dominance, algorithme de Kung en O(n log n), magasin témoin pour chaque offre écartée | **F2 · Prix fiable**<br>médiane pondérée par la fraîcheur, la preuve et le contributeur (sélection rapide, O(n) en moyenne), écart absolu médian et score z robuste, confiance par taille effective de Kish | **F1 · Construire ma liste**<br>normalisation des libellés et des formats, présélection par trigrammes (`pg_trgm`, index GIN), similarité de Dice, seuils de décision mesurés en précision et rappel |
@@ -98,7 +102,7 @@ L'application s'organise autour de deux écrans : la liste de courses (F1), d'o�
  Front ──HTTP/JSON──▶ API REST ──────────▶ Back (cas d'utilisation) ──JPA/SQL──▶ BD
  (web mobile)         (Spring MVC)         (Java 21, hexagonal)                  (PostgreSQL 17)
  Angular, 10 écrans   /api/v1, OpenAPI     9 cas d'utilisation                   ~15 tables
-                                           1 par feature                         1 migration par feature
+                                           1 par feature                         migrations Flyway
 
  Produit 1──* ReleveDePrix *──1 Magasin *──1 Enseigne      Menage 1──* ListeDeCourses 1──* Ligne *──1 Produit
  Ticket 1──* LigneDeTicket *──1 Produit                    Menage 1──* ProduitSuivi *──1 Produit
@@ -111,9 +115,11 @@ L'application s'organise autour de deux écrans : la liste de courses (F1), d'o�
 | Front | Angular et TypeScript, application web mobile installable | Client de l'API REST uniquement, scan du code-barres par la caméra du téléphone, lecture des tickets dans le navigateur pour que la photo ne quitte pas le téléphone, dépôt Kadi-front. |
 | API REST | Spring Boot 4 (Spring MVC), OpenAPI et Swagger UI | Versionnée sous `/api/v1`, contrat écrit avant le code pour que le front avance en parallèle, erreurs au format RFC 9457. |
 | Back | Java 21, Spring Boot 4, Spring Data JPA, Bean Validation | Architecture hexagonale. Un prix est un relevé daté, jamais un attribut du produit. Montants en `BigDecimal`. |
-| BD | PostgreSQL 17 avec l'extension `pg_trgm` | Schéma versionné par Flyway, une migration par feature. Les calculs (médianes, fenêtres, optimisations) restent dans le domaine Java pour être testables sans base. |
+| BD | PostgreSQL 17 avec l'extension `pg_trgm` | Schéma versionné par des migrations Flyway selon les besoins de chaque feature. Les calculs (médianes, fenêtres, optimisations) restent dans le domaine Java pour être testables sans base. |
 | Qualité | JUnit 5, AssertJ, jqwik, ArchUnit, Testcontainers, JaCoCo, SonarCloud | Tests de propriétés face à une solution de référence exhaustive. Tests d'intégration sur un vrai PostgreSQL, car H2 ne gère pas `pg_trgm`. Intégration continue GitHub Actions. |
 | Conteneurs | Docker Compose | Base de données dès v0.1.0, application complète en v0.2.0. |
+
+**Modèle et conventions de l'API.** Les tables et relations du schéma ci-dessus sont une anticipation du modèle initial, qui pourra évoluer avec les features. Chaque évolution du schéma est versionnée par Flyway, sans modifier une migration déjà livrée. Les conventions REST s'appliquent à toutes les routes : URI de ressources, verbes HTTP adaptés aux opérations, codes de statut documentés, validation des entrées et erreurs au format RFC 9457. Le contrat OpenAPI décrit ces règles et les réponses de l'API.
 
 **Qualité du code.** Au-delà de l'architecture hexagonale, nous tenons quelques règles simples. Les noms parlent le langage des ménages (`PrixUnitaire`, `ReleveDePrix`, `EconomieNette`). Les objets valeur sont immuables et refusent un état absurde dès leur construction, un prix négatif ou une quantité nulle par exemple. Les design patterns sont utilisés quand ils servent et nommés dans les fiches, Stratégie pour les algorithmes de panier, Adaptateur pour les sources de prix. L'API respecte les conventions REST et les règles de sécurité OWASP, et la quality gate SonarCloud doit rester au vert.
 
@@ -125,9 +131,11 @@ Les étapes s'enchaînent dans cet ordre, sans en sauter : on ne commence une é
 |---|---|---|
 | 1. Idéation | Besoin et scénario du ménage, algorithme retenu avec sa complexité et les alternatives écartées, impact sur le schéma et l'API, critères d'acceptation. Issue GitHub et fiche dans `doc/features/`. | La fiche est validée par un autre membre. |
 | 2. Back | Migration Flyway, domaine en Java pur (modèle, règles, algorithme), application (ports et service), adaptateur de persistance. | Le code compile et ArchUnit passe. |
-| 3. Tests | Tests unitaires de l'algorithme sur les cas limites (produit sans code-barres, relevé de plus de 30 jours, unités incompatibles, panier vide), services testés avec de faux adaptateurs, intégration sur PostgreSQL. | `./gradlew build` passe et chaque critère d'acceptation est couvert. |
+| 3. Tests | Tests unitaires de l'algorithme sur les cas limites (produit sans code-barres, relevé de plus de 30 jours, unités incompatibles, panier vide), services testés avec de faux adaptateurs, tests d'intégration sur PostgreSQL et tests de validation des critères d'acceptation. | `./gradlew build` passe, les tests d'intégration et de validation passent et chaque critère d'acceptation est couvert. |
 | 4. API REST | Endpoints `/api/v1`, DTO validés, erreurs `problem+json`, contrat OpenAPI, tests de l'API. | Visible dans Swagger UI, tests de l'API au vert. |
 | 5. Front | Écrans qui consomment uniquement l'API. | Le scénario de la section 03 se joue de bout en bout, la PR est relue, la fiche est complétée avec son araignée. |
+
+**Definition of Done.** Une feature est terminée lorsque sa fiche et ses critères d'acceptation sont validés, son code et ses migrations éventuelles sont relus, les tests unitaires, d'intégration, d'API et de validation passent, et son scénario est vérifié de bout en bout. Le contrat OpenAPI et la documentation sont à jour, la pull request est approuvée et aucun défaut bloquant connu ne subsiste.
 
 ## 07 Protocole d'usage de l'IA
 
@@ -151,3 +159,13 @@ Les étapes s'enchaînent dans cet ordre, sans en sauter : on ne commence une é
 ![Part IA par compétence](part-ia.png)
 
 Valeurs déclarées par l'équipe et mises à jour à chaque livraison. À partir de v0.1.0, elles seront tenues dans `doc/part-ia.json` et régénérées à chaque compilation du dossier. À la livraison R1, aucune ligne de code applicatif n'existe encore. La part déclarée vient de la mise en place des dépôts, du script qui compile ce dossier et de l'aide au débogage de Git. Les compétences de haut niveau restent humaines, l'IA n'y a servi qu'à vérifier des faits.
+
+## 09 Bibliographie et références
+
+1. **Insee**, *Indice des prix à la consommation — base 2015, ensemble des ménages, France*, série historique arrêtée : <https://www.insee.fr/fr/statistiques/serie/001759970>.
+2. **UFC-Que Choisir**, « Livraison de courses — Toujours plus, toujours plus vite ! », enquête, *Que Choisir* n° 595, octobre 2020, p. 54. Référence sur les services de livraison, et non source d'un chiffre sur les écarts de prix entre enseignes : <https://www.quechoisir.org/recherche/?keyword=prix%20des%20supermarches>.
+3. **UFC-Que Choisir**, « Grande distribution — On cause plus, on flingue... », enquête, *Que Choisir* n° 563, novembre 2017, p. 27 : <https://www.quechoisir.org/recherche/?keyword=comparateur%20supermarch%C3%A9s>.
+4. **Open Food Facts**, *Open Prices*, base collaborative de relevés de prix : <https://prices.openfoodfacts.org/>.
+5. **Open Food Facts**, base ouverte de fiches produits : <https://world.openfoodfacts.org/>.
+6. **Code de la consommation**, article L. 112-1-1, prix antérieur annoncé lors d'une réduction : <https://www.legifrance.gouv.fr/search/code?query=L112-1-1>.
+ 
