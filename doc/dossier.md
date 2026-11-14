@@ -11,9 +11,9 @@ Nous sommes trois apprentis en première année de master MIAGE et nous construi
 
 | Membre | Compte GitHub | Email des commits | Fil rouge |
 |---|---|---|---|
-| Amal BENATALLAH | [@Amalbenatallah](https://github.com/Amalbenatallah) | 42005281@parisnanterre.fr | La donnée produit et son histoire |
-| Adam BENDJEBBAR | [@AdamBendjebbar](https://github.com/AdamBendjebbar) | 43006224@parisnanterre.fr | Le juste prix et le budget |
-| Assia FERRADJ | [@AssFrdz](https://github.com/AssFrdz) | 45008425@parisnanterre.fr | La décision d'achat |
+| Amal BENATALLAH | [@Amalbenatallah](https://github.com/Amalbenatallah) | 42005281@parisnanterre.fr | L'optimisation de la décision d'achat |
+| Adam BENDJEBBAR | [@AdamBendjebbar](https://github.com/AdamBendjebbar) | 43006224@parisnanterre.fr | Le juste prix |
+| Assia FERRADJ | [@AssFrdz](https://github.com/AssFrdz) | 45008425@parisnanterre.fr | La donnée d'achat et son histoire |
 
 Chaque membre porte une feature par version (section 04) et a vérifié que son email Git est associé à son compte GitHub, pour que ses commits lui soient bien attribués.
 
@@ -40,15 +40,17 @@ Les outils qui existent, comparateur d'enseigne, palmarès national ou base ouve
 
 | Ce qui existe | Ce que fait Kadi | Le calcul derrière |
 |---|---|---|
-| Comparer le prix d'un produit | Suit le prix au kilo dans le temps et repère la réduflation, même quand le code-barres change avec la quantité | prix ÷ quantité nette, variation en % |
-| Afficher une promotion | Confronte le prix de référence annoncé au plus bas prix que Kadi a relevé sur les 30 jours précédents | min des prix relevés sur 30 jours |
-| Comparer des paniers | Cherche la meilleure répartition sous contraintes réelles (nombre de magasins, voiture ou non) et affiche l'économie nette | Σ prix + coût du trajet |
-| Suivre un budget | Mesure l'inflation propre au ménage et projette la fin du mois | Σ pₜ·q₀ ÷ Σ p₀·q₀ |
-| Proposer moins cher | Propose une alternative en disant ce qui change (quantité, composition, prix unitaire) | similarité × économie unitaire |
+| Afficher un prix relevé | Donne un prix de référence qu'une erreur de saisie ne peut pas fausser, avec sa confiance et ses relevés | médiane pondérée, écart absolu médian |
+| Comparer le prix d'un produit | Ne garde que les magasins qui valent le coup et montre leur compromis : le moins cher, le plus proche, le prix le plus sûr | front de Pareto |
+| Afficher une promotion | Confronte le prix de référence annoncé au plus bas prix relevé sur les 30 jours précédents, et calcule ce qu'une offre « 2e à −50 % » rapporte vraiment par unité | minimum glissant sur 30 jours, prix unitaire effectif |
+| Comparer des paniers | Cherche où acheter la liste réelle du ménage sous contraintes (nombre de magasins, temps, voiture ou non) et affiche l'économie nette | Σ prix + trajet minimal (Held–Karp) |
+| Suivre ses dépenses | Mesure l'inflation propre au ménage, rayon par rayon, et repère la réduflation même quand le code-barres change avec la quantité | indices de Laspeyres et de Fisher chaînés |
+| Proposer moins cher | Propose une alternative en disant ce qui change (quantité, composition, prix unitaire), sans jamais remplacer un article sans accord | contraintes + sac à dos à choix multiples |
+| Surveiller un prix | Prévient quand un produit habituel baisse durablement, pas pour une promotion d'un jour | médiane glissante, CUSUM |
 
 **Positionnement.** Kadi s'adresse d'abord aux ménages qui comptent chaque euro sans avoir le temps de tout vérifier : familles monoparentales, retraités, étudiants, actifs qui font leurs courses en drive. Sa promesse est simple, payer le juste prix et savoir pourquoi. Aucune enseigne ne pourra payer pour être mieux placée, car notre crédibilité repose entièrement sur cette indépendance. L'application restera gratuite pour les ménages. Le modèle économique que nous voulons tester d'ici la v1.0.0 vise les structures qui les accompagnent, CCAS, épiceries solidaires, associations ou comités d'entreprise, avec un suivi du coût d'un panier de référence sur leur territoire. Nous le confronterons à une dizaine d'entretiens avant d'y consacrer du code.
 
-**La donnée d'abord.** Le défi de Kadi tient moins au code qu'à la qualité des prix. Chaque prix affiché porte sa source et sa date, et le catalogue de démonstration est présenté comme tel. Les prix proviennent de sources autorisées, la base ouverte Open Prices et les tickets de caisse que les utilisateurs choisissent de partager, branchées derrière une même interface pour qu'aucune ne soit indispensable.
+**La donnée d'abord.** Le défi de Kadi tient moins au code qu'à la qualité des prix. Chaque prix affiché porte sa source et sa date, et le catalogue de démonstration est présenté comme tel. Les prix proviennent de sources autorisées, la base ouverte Open Prices et les tickets de caisse que les utilisateurs choisissent de partager, branchées derrière une même interface pour qu'aucune ne soit indispensable. Les fiches produits viennent d'Open Food Facts et les indices nationaux de l'Insee. Aucun prix ne repose sur un relevé isolé : chacun est confronté aux autres relevés du même produit avant d'être affiché.
 
 > **Ce que l'étiquette ne dit pas, Kadi le calcule.**
 
@@ -56,47 +58,61 @@ Les outils qui existent, comparateur d'enseigne, palmarès national ou base ouve
 
 Chaque scénario part d'une situation vécue par un ménage et désigne la feature qui y répond. Ses chiffres serviront de jeu de données au test de bout en bout de la livraison indiquée.
 
-**Sonia, 34 ans, seule avec deux enfants, 380 € de courses par mois.** Le 20, il lui reste 90 €. Kadi a fait le calcul avant elle : à son rythme de 14,50 € par jour, le mois finirait 55 € au-dessus du budget, alors qu'il faudrait tenir avec 9 € par jour. Kadi ne promet pas de miracle. Il propose deux échanges sur sa liste de la semaine, des pâtes et des céréales d'une autre marque au même grammage, qui lui font gagner 6,40 € sans changer de magasin. *Budget et alternatives, v1.0.0.*
+**Inès tape sa liste comme elle parle.** « lait », « pâtes barilla », « coca 6 ». Kadi reconnaît le lait demi-écrémé 1 L et le pack de Coca-Cola 6 × 33 cl, et ne lui pose qu'une question : quelles pâtes Barilla ? Elle choisit, et Kadi s'en souviendra la semaine suivante. Une ligne qu'il ne reconnaît pas reste signalée, jamais devinée. *Construire ma liste, v0.1.0.*
 
-**Marc, 74 ans, sans voiture.** Il a deux supermarchés à pied de chez lui et une certitude : le premier est le moins cher, tout le quartier le dit. Kadi compare les deux sur ce que Marc achète vraiment, à partir de ses deux derniers mois de tickets. Sur son panier de 210 € par mois, riche en produits frais, c'est le second qui revient 7 % moins cher, soit 15 € par mois. La contrainte « un seul magasin, accessible à pied » entre directement dans le calcul. *Panier optimisé avec k = 1, v0.2.0.*
+**Karim, en rayon, tape 0,10 € au lieu de 1,10 €.** Au Leclerc de Clichy, le lait demi-écrémé 1 L a une référence de 1,09 €, calculée sur les relevés de cinq personnes. Kadi arrête la saisie de Karim : ce prix est inhabituel, il faut le confirmer. Parmi les relevés existants, une saisie identique à 0,10 € a déjà été écartée, et un contributeur qui a saisi 1,15 € cinq jours de suite ne compte que pour un. La référence reste à 1,09 € avec une confiance élevée, là où la moyenne des relevés afficherait 1,02 €. *Prix fiable, v0.1.0.*
+
+**Karim cherche où acheter sa lessive.** Sur douze magasins connus autour de chez lui, Kadi n'en garde que trois : le moins cher, à 4,2 km, le plus proche, pour 1,45 € de plus, et un compromis à 1,8 km. Les neuf autres sont écartés, chacun battu à la fois sur le prix et sur la distance par l'un des trois, et Kadi dit lequel. *Où acheter ce produit, v0.1.0.*
+
+**Thomas photographie son ticket de drive.** Kadi reconnaît 38 lignes, en laisse deux à confirmer et trouve 6,00 € d'écart avec le total imprimé. Il en propose la cause : une ligne lue 7,29 € au lieu de 1,29 €. Thomas corrige d'un geste, et réimporter le même ticket ne crée aucun doublon. *Import de tickets, v0.2.0.*
+
+**Marc, 74 ans, sans voiture.** Il a deux supermarchés à pied de chez lui et une certitude : le premier est le moins cher, tout le quartier le dit. Kadi compare les deux sur ce que Marc achète vraiment, à partir de ses deux derniers mois de tickets. Sur son panier de 210 € par mois, riche en produits frais, c'est le second qui revient 7 % moins cher, soit 15 € par mois. La contrainte « un seul magasin, accessible à pied » entre directement dans le calcul. *Optimiser ma liste avec un seul arrêt, v0.2.0.*
 
 **Léa, devant une lessive à « −25 % ».** Le prix barré affiche 12,99 €, le prix promotionnel 9,74 €. Elle scanne le code-barres. Kadi a relevé ce même produit à 9,49 € dans ce magasin il y a trois semaines. Comparée au plus bas prix des 30 derniers jours, la promotion est en fait une hausse de 2,6 %, et l'enseigne voisine vend la même lessive 8,95 €. Kadi se garde de parler d'infraction. Il montre ses relevés, chacun avec sa date, et laisse Léa juger. *Vérification des promotions, v0.2.0.*
 
-**Nadia et ses deux ados.** Les biscuits du goûter coûtent toujours 2,19 €, mais le paquet est passé de 200 g à 180 g. Le prix au kilo grimpe de 10,95 € à 12,17 €. Le code-barres a changé avec la quantité, comme l'imposent les règles GS1, alors Kadi relie l'ancien et le nouveau produit grâce à son moteur de rapprochement avant d'envoyer l'alerte. Il propose dans la foulée un équivalent à 9,45 € le kilo. *Historique et réduflation, v0.2.0.*
+**Nadia et ses deux ados.** Les biscuits du goûter coûtent toujours 2,19 €, mais le paquet est passé de 200 g à 180 g. Le prix au kilo grimpe de 10,95 € à 12,17 €. Le code-barres a changé avec la quantité, comme l'imposent les règles GS1, alors Kadi relie l'ancien et le nouveau produit grâce à son moteur de rapprochement. Dans le détail de son inflation, Nadia voit la hausse réelle du prix au kilo, que l'étiquette ne montrait plus. *Mon inflation et réduflation, v1.0.0.*
 
-**Thomas et Inès, 40 articles en drive.** Leur panier coûte 112 € dans un drive, 98 € s'ils le partagent entre deux. Kadi affiche les 14 € d'écart, puis ce qu'ils coûtent vraiment : 6 km et 20 minutes de plus, soit 3,82 € au barème kilométrique. Il reste 10,18 € gagnés en 20 minutes, autour de 30 € de l'heure. À eux de décider si leur samedi matin vaut ce prix. *Panier optimisé et économie nette, v0.2.0.*
+**Thomas et Inès, 40 articles en drive.** Leur panier coûte 112 € dans un drive, 98 € s'ils le partagent entre deux. Kadi affiche les 14 € d'écart, puis ce qu'ils coûtent vraiment : 6 km et 20 minutes de plus, soit 3,82 € au barème kilométrique. Il reste 10,18 € gagnés en 20 minutes, autour de 30 € de l'heure. À eux de décider si leur samedi matin vaut ce prix. *Optimiser ma liste et économie nette, v0.2.0.*
 
-**Yanis, étudiant, 150 € par mois.** Il scanne ses tickets depuis la rentrée. Un an plus tard, Kadi recalcule son panier de septembre aux prix d'aujourd'hui : il coûte 6 % de plus, et la moitié de la hausse vient des produits laitiers. Yanis sait enfin où part son argent et sur quoi agir, ce qu'une moyenne nationale ne lui aurait jamais dit. *Inflation personnelle, v1.0.0.*
+**Sonia, 34 ans, seule avec deux enfants, 380 € de courses par mois.** Le 20, il lui reste 90 € pour finir le mois. Elle fixe ce budget à sa liste de la semaine. Kadi ne promet pas de miracle : parmi les remplacements possibles, il choisit la combinaison qui respecte ses exclusions et tient dans le budget, des pâtes et des céréales d'une autre marque au même grammage, qui lui font gagner 6,40 € sans changer de magasin. Chaque échange attend son accord. *Alternatives, v1.0.0.*
+
+**Martine, retraitée, suit son café moulu.** Une promotion d'un jour à −30 % ne déclenche rien. Trois semaines plus tard, le prix baisse durablement de 8 % dans son magasin : Kadi la prévient une seule fois, avec les relevés datés qui le montrent. *Alertes prix, v1.0.0.*
+
+**Yanis, étudiant, 150 € par mois.** Il scanne ses tickets depuis la rentrée. En janvier, Kadi recalcule son panier de septembre aux prix d'aujourd'hui : il coûte 6 % de plus, et la moitié de la hausse vient des produits laitiers. Kadi place ce chiffre à côté de l'indice alimentaire de l'Insee. Yanis sait enfin où part son argent et sur quoi agir, ce qu'une moyenne nationale ne lui aurait jamais dit. *Mon inflation, v1.0.0.*
 
 ## 04 Plan des features
 
-Une feature a un effet sur la BD, le back, l'API REST et le front. Chaque feature est portée par une seule personne et repose sur un algorithme identifié.
+Une feature a un effet sur la BD, le back, l'API REST et le front. Chaque feature est portée par une seule personne, repose sur un algorithme identifié et dispose de sa fiche dans `doc/features/`. Chaque algorithme est comparé à une solution de référence exhaustive sur de petites instances.
 
 | Version | Amal BENATALLAH | Adam BENDJEBBAR | Assia FERRADJ |
 |---|---|---|---|
-| **v0.1.0** 24/11 | **Catalogue et rapprochement**<br>normalisation des libellés et des formats, similarité par trigrammes (`pg_trgm`) avec index GIN pour éviter la comparaison deux à deux en O(n²), seuil de confiance affiché | **Relevés de prix et prix unitaire**<br>conversion d'unités (g, kg, cl, L, lots) et calcul exact en `BigDecimal`, arrondi au centime seulement à l'affichage | **Comparateur**<br>tri multicritère des offres par prix unitaire, fraîcheur du relevé et confiance du rapprochement, en O(n log n) |
-| **v0.2.0** 08/12 | **Historique et réduflation**<br>détection d'une baisse de quantité à prix stable, ancien et nouveau code-barres reliés par le rapprochement | **Vérification des promotions**<br>minimum glissant sur 30 jours par fonction de fenêtre SQL, écart au prix de référence annoncé | **Panier optimisé**<br>énumération des C(m,k) groupes de k magasins, chaque article affecté au moins cher du groupe, trajet compris, en O(C(m,k)·n·k) |
-| **v1.0.0** 19/01 | **Inflation personnelle**<br>indice de Laspeyres à panier fixe Σ pₜ·q₀ ÷ Σ p₀·q₀, avec la contribution de chaque rayon | **Budget et fin de mois**<br>projection du rythme de dépense, alerte de dépassement, budget restant par jour | **Alternatives**<br>score de similarité (catégorie, quantité, marque) pondéré par l'économie au prix unitaire, glouton comparé à l'exhaustif |
+| **v0.1.0** 24/11 | **F3 · Où acheter ce produit**<br>front de Pareto sur le prix unitaire, la distance et la confiance du prix, ε-dominance, algorithme de Kung en O(n log n), magasin témoin pour chaque offre écartée | **F2 · Prix fiable**<br>médiane pondérée par la fraîcheur, la preuve et le contributeur (sélection rapide, O(n) en moyenne), écart absolu médian et score z robuste, confiance par taille effective de Kish | **F1 · Construire ma liste**<br>normalisation des libellés et des formats, présélection par trigrammes (`pg_trgm`, index GIN), similarité de Dice, seuils de décision mesurés en précision et rappel |
+| **v0.2.0** 08/12 | **F6 · Optimiser ma liste**<br>énumération des ensembles d'au plus k magasins, ordre de visite par Held–Karp en O(m²·2ᵐ) pour tous les ensembles à la fois, front coût/temps | **F5 · Vérification des promotions**<br>minimum glissant sur 30 jours par file monotone en O(n), réductions successives, prix unitaire effectif selon le type de promotion | **F4 · Import de tickets**<br>lecture des lignes par machine à états, affectation des libellés aux produits par l'algorithme hongrois en O(n³), correction par le total, import sans doublon |
+| **v1.0.0** 19/01 | **F9 · Alternatives**<br>contraintes dures, similarité dans l'arbre des catégories, sélection sur toute la liste par sac à dos à choix multiples en O(a·B·c) | **F8 · Alertes prix**<br>médiane glissante robuste, détection d'une baisse durable par CUSUM, machine à états avec hystérésis | **F7 · Mon inflation**<br>indices de Laspeyres, Paasche et Fisher chaînés, repli sur les indices Insee par rayon, contribution de chaque rayon, réduflation |
+
+L'application s'organise autour de deux écrans : la liste de courses (F1), d'où partent F4, F6 et F9, et la fiche produit (F3), qui affiche aussi F2, F5 et F8.
 
 ## 05 Architecture
 
 ```text
  Front ──HTTP/JSON──▶ API REST ──────────▶ Back (cas d'utilisation) ──JPA/SQL──▶ BD
  (web mobile)         (Spring MVC)         (Java 21, hexagonal)                  (PostgreSQL 17)
- Angular, 6 écrans    /api/v1, OpenAPI     9 cas d'utilisation                   ~10 tables
+ Angular, 10 écrans   /api/v1, OpenAPI     9 cas d'utilisation                   ~15 tables
                                            1 par feature                         1 migration par feature
 
- Produit 1──* ReleveDePrix *──1 Magasin *──1 Enseigne      Menage 1──* Panier 1──* LignePanier *──1 Produit
+ Produit 1──* ReleveDePrix *──1 Magasin *──1 Enseigne      Menage 1──* ListeDeCourses 1──* Ligne *──1 Produit
+ Ticket 1──* LigneDeTicket *──1 Produit                    Menage 1──* ProduitSuivi *──1 Produit
  Port SourceDePrix ◀── OpenPrices | Ticket de caisse | Catalogue de démonstration
+ Port FicheProduit ◀── Open Food Facts                     Port IndicesDePrix ◀── Insee
 ```
 
 | Couche | Choix | Remarques |
 |---|---|---|
-| Front | Angular et TypeScript, application web mobile installable | Client de l'API REST uniquement, scan du code-barres par la caméra du téléphone, dépôt Kadi-front. |
+| Front | Angular et TypeScript, application web mobile installable | Client de l'API REST uniquement, scan du code-barres par la caméra du téléphone, lecture des tickets dans le navigateur pour que la photo ne quitte pas le téléphone, dépôt Kadi-front. |
 | API REST | Spring Boot 4 (Spring MVC), OpenAPI et Swagger UI | Versionnée sous `/api/v1`, contrat écrit avant le code pour que le front avance en parallèle, erreurs au format RFC 9457. |
 | Back | Java 21, Spring Boot 4, Spring Data JPA, Bean Validation | Architecture hexagonale. Un prix est un relevé daté, jamais un attribut du produit. Montants en `BigDecimal`. |
-| BD | PostgreSQL 17 avec l'extension `pg_trgm` | Schéma versionné par Flyway, une migration par feature. Fonctions de fenêtre pour l'historique et la règle des 30 jours. |
-| Qualité | JUnit 5, AssertJ, ArchUnit, Testcontainers, JaCoCo, SonarCloud | Tests d'intégration sur un vrai PostgreSQL, car H2 ne gère ni `pg_trgm` ni nos requêtes de fenêtre. Intégration continue GitHub Actions. |
+| BD | PostgreSQL 17 avec l'extension `pg_trgm` | Schéma versionné par Flyway, une migration par feature. Les calculs (médianes, fenêtres, optimisations) restent dans le domaine Java pour être testables sans base. |
+| Qualité | JUnit 5, AssertJ, jqwik, ArchUnit, Testcontainers, JaCoCo, SonarCloud | Tests de propriétés face à une solution de référence exhaustive. Tests d'intégration sur un vrai PostgreSQL, car H2 ne gère pas `pg_trgm`. Intégration continue GitHub Actions. |
 | Conteneurs | Docker Compose | Base de données dès v0.1.0, application complète en v0.2.0. |
 
 **Qualité du code.** Au-delà de l'architecture hexagonale, nous tenons quelques règles simples. Les noms parlent le langage des ménages (`PrixUnitaire`, `ReleveDePrix`, `EconomieNette`). Les objets valeur sont immuables et refusent un état absurde dès leur construction, un prix négatif ou une quantité nulle par exemple. Les design patterns sont utilisés quand ils servent et nommés dans les fiches, Stratégie pour les algorithmes de panier, Adaptateur pour les sources de prix. L'API respecte les conventions REST et les règles de sécurité OWASP, et la quality gate SonarCloud doit rester au vert.
