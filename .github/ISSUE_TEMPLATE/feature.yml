@@ -1,0 +1,51 @@
+name: Feature
+description: Une feature complète (BD, back, API, front), portée par une personne, avec un algorithme
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version visée
+      options: [v0.1.0, v0.2.0, v1.0.0]
+    validations:
+      required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      options: [catalogue, prix, comparaison, nouveau module]
+    validations:
+      required: true
+  - type: input
+    id: fiche
+    attributes:
+      label: Fiche
+      placeholder: doc/features/v0.1.0-F1-nom.md
+    validations:
+      required: true
+  - type: textarea
+    id: besoin
+    attributes:
+      label: Besoin et scénario d'usage
+    validations:
+      required: true
+  - type: textarea
+    id: algorithme
+    attributes:
+      label: Algorithme
+      description: Nom, complexité, alternatives écartées.
+    validations:
+      required: true
+  - type: input
+    id: migration
+    attributes:
+      label: Migration réservée
+      placeholder: V2__catalogue.sql
+  - type: textarea
+    id: criteres
+    attributes:
+      label: Critères d'acceptation
+      value: "- [ ] "
+    validations:
+      required: true
