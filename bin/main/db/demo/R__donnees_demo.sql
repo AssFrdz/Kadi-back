@@ -1,2 +1,0 @@
--- Catalogue de démonstration, chargé uniquement par le profil demo.
--- Migration répétable : elle doit rester idempotente (ON CONFLICT DO NOTHING...).
