@@ -1,9 +1,39 @@
+## Identification de la feature
+| Version | Responsable | Algorithme(s) |
+|---|---|---|
+| v0.1.0 / v0.2.0 / v1.0.0 | Prénom NOM (`@compte-github`) | <nom de l'algorithme> |
+
 ## Issue associée
 Closes #
 <!-- L'issue est fermée automatiquement à la fusion dans la branche par défaut. -->
 
-## Description des modifications
-<!-- Besoin couvert, scénario d'usage et lien vers la fiche de la feature. -->
+## Spécification de la feature
+### Besoin et scénarios d'usage
+<!-- Quel problème de l'utilisateur ? Pourquoi est-ce difficile à résoudre « à la main » ? -->
+- *En tant que …*, je … **afin de …**
+
+### Modèle
+<!-- Entités et objets valeur, invariants (règles toujours vraies), où ils sont vérifiés et lien avec l'entité pivot. -->
+
+### Algorithme
+<!-- Principe, pseudo-code ou déroulé sur un petit exemple, complexité en temps et en mémoire,
+     alternatives écartées et pourquoi, structures de données choisies. -->
+
+### Impact sur les couches
+- **BD** : migration `V<n>__<nom>.sql` (tables, contraintes)
+- **Back** : module `<module>` (domain, application, adapters)
+- **API** : `MÉTHODE /api/v1/...` (codes de retour)
+- **Front** : <écran>
+
+### Critères d'acceptation
+- [ ] <comportement observable et testable>
+- [ ] <cas d'erreur>
+
+### Limites connues
+<!-- Ce qui n'est pas traité, les simplifications assumées et les pistes pour plus tard. -->
+
+### Description des modifications
+<!-- Résumé de ce qui a été implémenté et lien vers la fiche de la feature. -->
 
 ## Checklist (dans l'ordre de la démarche)
 <!-- Indiquer « sans objet » et justifier dans la description lorsqu'un point ne s'applique pas. -->
@@ -16,7 +46,8 @@ Closes #
 - [ ] Jeu de démonstration (`db/demo`) mis à jour si nécessaire
 
 ## Tests réalisés
-<!-- Commandes, résultats, vérifications manuelles et éventuelles limites. -->
+<!-- Commandes, résultats, vérifications manuelles et éventuelles limites.
+     Indiquer le nombre de tests par type, les propriétés vérifiées et la couverture du module. -->
 
 ## Impact éventuel
 <!-- Migration, contrat d'API, autre module ou front concerné. -->
@@ -25,6 +56,16 @@ Closes #
 <!-- Outil, objet de la demande, ce qui a été repris, modifié ou rejeté. -->
 
 ## Part IA par compétence (en %)
-| Idéation | Conception | Spécification | Algorithmique | Validation | Code | Tests | CI/CD | Rédaction | Débogage |
-|---|---|---|---|---|---|---|---|---|---|
-| | | | | | | | | | |
+<!-- Expliquer chaque objectif non tenu. -->
+| Compétence | Part IA | Plafond |
+|---|---|---|
+| Idéation | % | 30 % |
+| Conception | % | 30 % |
+| Spécification | % | 40 % |
+| Algorithmique | % | 30 % |
+| Validation | % | 20 % |
+| Code | % | 70 % |
+| Tests | % | 60 % |
+| CI/CD | % | 80 % |
+| Rédaction | % | 70 % |
+| Débogage | % | 70 % |
