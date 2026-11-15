@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="fr.miage.kadi.KadiApplicationIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-15T11:00:08.729Z" hostname="N15I711-16GR512" time="23.764">
+  <properties/>
+  <testcase name="contextLoads()" classname="fr.miage.kadi.KadiApplicationIT" time="0.737"/>
+  <system-out><![CDATA[12:00:09.093 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [fr.miage.kadi.KadiApplicationIT]: KadiApplicationIT does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:00:09.309 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration fr.miage.kadi.KadiApplication for test class fr.miage.kadi.KadiApplicationIT
+12:00:09.559 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [fr.miage.kadi.KadiApplicationIT]: KadiApplicationIT does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:00:09.562 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration fr.miage.kadi.KadiApplication for test class fr.miage.kadi.KadiApplicationIT
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-11-15T12:00:10.145+01:00  INFO 16180 --- [    Test worker] fr.miage.kadi.KadiApplicationIT          : Starting KadiApplicationIT using Java 21.0.13.0.2 with PID 16180 (started by assia in C:\Users\assia\Documents\Kadi\back)
+2026-11-15T12:00:10.147+01:00  INFO 16180 --- [    Test worker] fr.miage.kadi.KadiApplicationIT          : No active profile set, falling back to 1 default profile: "default"
+2026-11-15T12:00:11.957+01:00  INFO 16180 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-15T12:00:12.011+01:00  INFO 16180 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 31 ms. Found 0 JPA repository interfaces.
+2026-11-15T12:00:13.297+01:00  INFO 16180 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-15T12:00:13.413+01:00  INFO 16180 --- [    Test worker] org.testcontainers.images.PullPolicy     : Image pull policy will be performed by: DefaultPullPolicy()
+2026-11-15T12:00:13.427+01:00  INFO 16180 --- [    Test worker] o.t.utility.ImageNameSubstitutor         : Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+2026-11-15T12:00:13.449+01:00  INFO 16180 --- [    Test worker] org.testcontainers.DockerClientFactory   : Testcontainers version: 2.0.5
+2026-11-15T12:00:14.242+01:00  INFO 16180 --- [    Test worker] o.t.d.DockerClientProviderStrategy       : Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+2026-11-15T12:00:15.184+01:00  INFO 16180 --- [    Test worker] o.t.d.DockerClientProviderStrategy       : Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+2026-11-15T12:00:15.186+01:00  INFO 16180 --- [    Test worker] org.testcontainers.DockerClientFactory   : Docker host IP address is localhost
+2026-11-15T12:00:15.217+01:00  INFO 16180 --- [    Test worker] org.testcontainers.DockerClientFactory   : Connected to docker: 
+  Server Version: 29.9.3
+  API Version: 1.56
+  Operating System: Docker Desktop
+  Total Memory: 7816 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+2026-11-15T12:00:15.343+01:00  INFO 16180 --- [    Test worker] tc.testcontainers/ryuk:0.14.0            : Creating container for image: testcontainers/ryuk:0.14.0
+2026-11-15T12:00:15.522+01:00  INFO 16180 --- [    Test worker] o.t.utility.RegistryAuthLocator          : Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+2026-11-15T12:00:15.892+01:00  INFO 16180 --- [    Test worker] tc.testcontainers/ryuk:0.14.0            : Container testcontainers/ryuk:0.14.0 is starting: b28d87d436e1c3326c60e4f11d4c61c977158378c21bfcdc55122eb3fe2f7b8f
+2026-11-15T12:00:16.673+01:00  INFO 16180 --- [    Test worker] tc.testcontainers/ryuk:0.14.0            : Container testcontainers/ryuk:0.14.0 started in PT1.3306436S
+2026-11-15T12:00:16.683+01:00  INFO 16180 --- [    Test worker] o.t.utility.RyukResourceReaper           : Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+2026-11-15T12:00:16.683+01:00  INFO 16180 --- [    Test worker] org.testcontainers.DockerClientFactory   : Checking the system...
+2026-11-15T12:00:16.685+01:00  INFO 16180 --- [    Test worker] org.testcontainers.DockerClientFactory   : ✔︎ Docker server version should be at least 1.6.0
+2026-11-15T12:00:16.686+01:00  INFO 16180 --- [    Test worker] tc.postgres:17                           : Creating container for image: postgres:17
+2026-11-15T12:00:16.856+01:00  INFO 16180 --- [    Test worker] tc.postgres:17                           : Container postgres:17 is starting: 966fed4f0f35b35e1ae70328cf1df8f8e6eb81e0ac5f2437bfe73e48cbd7c39d
+2026-11-15T12:00:24.586+01:00  INFO 16180 --- [    Test worker] tc.postgres:17                           : Container postgres:17 started in PT7.9001027S
+2026-11-15T12:00:24.587+01:00  INFO 16180 --- [    Test worker] tc.postgres:17                           : Container is started (JDBC URL: jdbc:postgresql://localhost:63699/kadi?loggerLevel=OFF)
+2026-11-15T12:00:24.957+01:00  INFO 16180 --- [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.testcontainers.jdbc.ConnectionWrapper@54f7e81b
+2026-11-15T12:00:24.962+01:00  INFO 16180 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-15T12:00:25.030+01:00  INFO 16180 --- [    Test worker] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:63699/kadi?loggerLevel=OFF (PostgreSQL 17.12)
+2026-11-15T12:00:25.226+01:00  INFO 16180 --- [    Test worker] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2026-11-15T12:00:25.237+01:00  INFO 16180 --- [    Test worker] o.f.core.internal.command.DbValidate     : Successfully validated 1 migration (execution time 00:00.054s)
+2026-11-15T12:00:25.284+01:00  INFO 16180 --- [    Test worker] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2026-11-15T12:00:25.422+01:00  INFO 16180 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-11-15T12:00:25.459+01:00  INFO 16180 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - modele commun"
+2026-11-15T12:00:25.559+01:00  INFO 16180 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema "public", now at version v1 (execution time 00:00.048s)
+2026-11-15T12:00:25.833+01:00  INFO 16180 --- [    Test worker] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-15T12:00:26.019+01:00  INFO 16180 --- [    Test worker] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.5.Final
+2026-11-15T12:00:28.016+01:00  INFO 16180 --- [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-15T12:00:28.287+01:00  INFO 16180 --- [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:63699/kadi?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 17.12
+	Default catalog/schema: kadi/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-15T12:00:29.327+01:00  INFO 16180 --- [    Test worker] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-15T12:00:29.429+01:00  INFO 16180 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-15T12:00:31.514+01:00  INFO 16180 --- [    Test worker] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-15T12:00:31.638+01:00  INFO 16180 --- [    Test worker] fr.miage.kadi.KadiApplicationIT          : Started KadiApplicationIT in 21.958 seconds (process running for 28.292)
+2026-11-15T12:00:31.732+01:00  WARN 16180 --- [    Test worker] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-11-15T12:00:31.733+01:00  WARN 16180 --- [    Test worker] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+]]></system-out>
+  <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\assia\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.18.11\82212e5b3633e7a65fca8bec525762cfb6c9bae4\byte-buddy-agent-1.18.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>
