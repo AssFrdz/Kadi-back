@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import fr.miage.kadi.prix.domain.exception.DonneeInvalideException;
-import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +15,8 @@ class BriquesDuPrixTest {
     @Test
     void un_montant_est_au_centime_et_ne_depend_pas_de_son_ecriture() {
         assertThat(Montant.de("1.5")).isEqualTo(Montant.de("1.50"));
-        assertThat(Montant.de("1.50").valeur()).isEqualByComparingTo("1.50");
+        // toujours 2 décimales : equals de BigDecimal distinguerait 1.5 et 1.50
+        assertThat(Montant.de("1.5").valeur().scale()).isEqualTo(2);
         assertThat(Montant.de("0.99")).isLessThan(Montant.de("1.00"));
     }
 
@@ -26,7 +26,7 @@ class BriquesDuPrixTest {
         assertThatThrownBy(() -> Montant.de("-0.01")).isInstanceOf(DonneeInvalideException.class);
         assertThatThrownBy(() -> Montant.de("1.995")).isInstanceOf(DonneeInvalideException.class);
         // un zéro final n'est pas une fraction de centime
-        assertThat(Montant.de("1.990").valeur()).isEqualByComparingTo(new BigDecimal("1.99"));
+        assertThat(Montant.de("1.990")).isEqualTo(Montant.de("1.99"));
     }
 
     @Test
@@ -48,6 +48,11 @@ class BriquesDuPrixTest {
     void un_releve_designe_un_produit_et_un_magasin() {
         assertThatThrownBy(() -> releve(0, 1, "1.09", "Karim")).isInstanceOf(DonneeInvalideException.class);
         assertThatThrownBy(() -> releve(1, -3, "1.09", "Karim")).isInstanceOf(DonneeInvalideException.class);
+    }
+
+    @Test
+    void un_releve_a_toujours_une_date() {
+        // sans date, ni âge, ni poids, ni fraîcheur
         assertThatThrownBy(() -> new ReleveDePrix(null, 1, 1, Montant.de("1.09"), UniteDePrix.PIECE, null, TypeDePreuve.SAISIE, "Karim", false))
                 .isInstanceOf(DonneeInvalideException.class);
     }
