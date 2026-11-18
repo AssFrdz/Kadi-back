@@ -2,6 +2,8 @@ package fr.miage.kadi.prix.config;
 
 import fr.miage.kadi.prix.application.port.out.Referentiel;
 import fr.miage.kadi.prix.application.port.out.RelevesDePrix;
+import fr.miage.kadi.prix.application.port.out.StockageDesImports;
+import fr.miage.kadi.prix.application.service.ImportService;
 import fr.miage.kadi.prix.application.service.PrixFiableService;
 import fr.miage.kadi.prix.domain.algo.ParametresPrixFiable;
 import java.time.Clock;
@@ -23,6 +25,11 @@ class PrixConfiguration {
     @Bean
     ParametresPrixFiable parametresPrixFiable() {
         return ParametresPrixFiable.PAR_DEFAUT;
+    }
+
+    @Bean
+    ImportService importService(StockageDesImports stockage) {
+        return new ImportService(stockage);
     }
 
     @Bean
