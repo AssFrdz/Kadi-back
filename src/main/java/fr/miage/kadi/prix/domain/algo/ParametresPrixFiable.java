@@ -6,7 +6,7 @@ import java.time.ZoneId;
 
 /**
  * Tous les réglages du calcul du prix de référence, au même endroit.
- * Ils sont fixés a priori (fiche F2, section Limites) et seront recalibrés sur les données réelles.
+ * Fenêtre et demi-vie ont été recalibrées sur les données Open Prices (fiche F2, section Mesures sur les données réelles).
  */
 public record ParametresPrixFiable(
         Duration fenetre,
@@ -19,10 +19,13 @@ public record ParametresPrixFiable(
         double penaliteRepli,
         ZoneId fuseau) {
 
-    /** Valeurs de la fiche : 90 jours, demi-vies de 14 et 30 jours, seuil 3,5, plancher 2 %, dispersion 20 %, 3 contributeurs. */
+    /**
+     * Valeurs de la fiche : fenêtre de 180 jours, demi-vies de 30 jours, seuil 3,5, plancher 2 %, dispersion 20 %, 3 contributeurs.
+     * Fenêtre et demi-vie vont ensemble : avec 14 jours de demi-vie, un relevé de 6 mois pèserait 2^-13, presque rien.
+     */
     public static final ParametresPrixFiable PAR_DEFAUT = new ParametresPrixFiable(
-            Duration.ofDays(90),
-            Duration.ofDays(14),
+            Duration.ofDays(180),
+            Duration.ofDays(30),
             Duration.ofDays(30),
             3.5,
             0.02,

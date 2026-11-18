@@ -63,11 +63,17 @@ public final class CalculPrixDeReference {
             throw new DonneeInvalideException("Le calcul a besoin de l'instant présent");
         }
         Optional<Evaluation> auMagasin = evaluerUnNiveau(listeOuVide(duMagasin), maintenant, NiveauDeCalcul.MAGASIN);
-        if (auMagasin.isPresent()) {
+        if (auMagasin.isPresent() && auMagasin.get().contributeurs() >= parametres.contributeursMinimum()) {
             return auMagasin;
         }
-        // Étape 10 : repli sur l'enseigne, avec une confiance réduite
-        return evaluerUnNiveau(listeOuVide(deLEnseigne), maintenant, NiveauDeCalcul.ENSEIGNE);
+        // Étape 10 : trop peu de témoins dans le magasin, on regarde toute l'enseigne (confiance réduite),
+        // mais seulement si elle en apporte davantage
+        Optional<Evaluation> aLEnseigne = evaluerUnNiveau(listeOuVide(deLEnseigne), maintenant, NiveauDeCalcul.ENSEIGNE);
+        if (aLEnseigne.isPresent()
+                && (auMagasin.isEmpty() || aLEnseigne.get().contributeurs() > auMagasin.get().contributeurs())) {
+            return aLEnseigne;
+        }
+        return auMagasin;
     }
 
     /** Un relevé et son poids courant dans le calcul. */
