@@ -46,3 +46,7 @@ out/
 
 # base locale de jqwik (exemples ayant échoué, rejoués en premier)
 .jqwik-database
+
+# import Open Prices : export téléchargé, fichier extrait et environnement Python
+outils/open-prices/donnees/
+outils/open-prices/.venv/
