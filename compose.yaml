@@ -10,5 +10,12 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
+  mailpit:
+    image: axllent/mailpit:latest
+    profiles: ["email-test"]
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+
 volumes:
   db-data:
