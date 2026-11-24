@@ -36,26 +36,33 @@ class DonneesDemoScenarioIT {
         new ResourceDatabasePopulator(
                 new ClassPathResource("db/migration/V1__modele_commun.sql"),
                 new ClassPathResource("db/migration/V4__comptes_utilisateur.sql"),
+                new ClassPathResource("db/migration/V5__moderation_besoins.sql"),
                 new ClassPathResource("db/demo/R__donnees_demo.sql"),
-                new ClassPathResource("db/demo/R__donnees_demo.sql")).execute(dataSource);
+                new ClassPathResource("db/demo/R__images_open_food_facts.sql"),
+                new ClassPathResource("db/demo/R__donnees_demo.sql"),
+                new ClassPathResource("db/demo/R__images_open_food_facts.sql")).execute(dataSource);
     }
 
     @Test
     @DisplayName("La démo est idempotente : la rejouer ne crée aucun doublon")
     void laDemoEstRejouable() {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM produit WHERE type_reference = 'PRECIS'", Integer.class))
-                .isEqualTo(17);
+                .isEqualTo(29);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM produit WHERE type_reference = 'GENERIQUE'", Integer.class))
                 .isEqualTo(11);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM produit WHERE code_barres NOT LIKE '2001%'", Integer.class))
-                .isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM produit WHERE code_barres LIKE '2001%'", Integer.class))
+                .isEqualTo(9);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM produit p JOIN produit_open_food_facts off ON off.produit_id = p.id
+                WHERE off.identifiant_externe = p.code_barres AND off.image_url IS NOT NULL AND off.image_auteur IS NOT NULL
+                """, Integer.class)).isEqualTo(20);
     }
 
     @Test
     @DisplayName("« lait » propose le besoin générique et des laits précis ; F2 ne voit que les produits précis")
     void lait() {
         List<ProduitTrouve> liste = recherche.rechercherPourListe("lait", INES);
-        assertThat(libelles(liste)).contains("Lait demi-écrémé", "Lait demi-écrémé UHT 1 L");
+        assertThat(libelles(liste)).contains("Lait demi-écrémé", "Lait demi-écrémé pack 6 x 1 L");
         assertThat(recherche.rechercherAvecConfiance("lait"))
                 .noneMatch(trouve -> trouve.produit().type() == TypeReference.BESOIN_GENERIQUE);
     }

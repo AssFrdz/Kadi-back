@@ -6,19 +6,24 @@
 -- ---------------------------------------------------------------------------------------------
 -- F1 · Construire ma liste (Assia) — codes 2001000000xxx
 -- Scénario du dossier : « lait », « pâtes barilla », « coca 6 », plus « yaort » et des besoins génériques.
--- Fiches fictives de démonstration : marques et formats servent à jouer le scénario, pas à décrire l'offre réelle.
+-- Les produits réels avec photo (laits, pâtes Barilla, Coca-Cola, yaourts Danone...) viennent d'Open Food Facts :
+-- voir R__images_open_food_facts.sql. Ne restent ici que les fiches fictives sans équivalent réel retenu
+-- (packs Coca-Cola 6 x 33 cl du scénario « coca 6 », farine, articles non alimentaires...) : leurs marques et
+-- formats servent à jouer le scénario, pas à décrire l'offre réelle.
 -- ---------------------------------------------------------------------------------------------
+
+-- Anciennes fiches fictives remplacées par des fiches Open Food Facts réelles : retirées des bases de démo déjà
+-- chargées, sauf si une liste, un relevé de prix ou une proposition modérée y renvoie encore.
+DELETE FROM produit p
+WHERE p.code_barres IN ('2001000000011', '2001000000028', '2001000000035', '2001000000042',
+                        '2001000000059', '2001000000066', '2001000000080', '2001000000103')
+  AND NOT EXISTS (SELECT 1 FROM ligne_liste l WHERE l.produit_id = p.id)
+  AND NOT EXISTS (SELECT 1 FROM releve_de_prix r WHERE r.produit_id = p.id)
+  AND NOT EXISTS (SELECT 1 FROM besoin_personnalise b WHERE b.produit_id = p.id);
+
 INSERT INTO produit (libelle, code_barres, marque, format)
-VALUES ('Lait demi-écrémé UHT 1 L', '2001000000011', 'Lactel', '1 L'),
-       ('Lait demi-écrémé UHT pack 6 x 1 L', '2001000000028', 'Lactel', '6 x 1 L'),
-       ('Lait entier bio 1 L', '2001000000035', 'Carrefour Bio', '1 L'),
-       ('Spaghetti n°5', '2001000000042', 'Barilla', '500 g'),
-       ('Penne rigate n°73', '2001000000059', 'Barilla', '500 g'),
-       ('Fusilli n°98', '2001000000066', 'Barilla', '1 kg'),
-       ('Coca-Cola pack 6 x 33 cl', '2001000000073', 'Coca-Cola', '6 x 33 cl'),
-       ('Coca-Cola bouteille 1,5 L', '2001000000080', 'Coca-Cola', '1,5 L'),
+VALUES ('Coca-Cola pack 6 x 33 cl', '2001000000073', 'Coca-Cola', '6 x 33 cl'),
        ('Coca-Cola zéro pack 6 x 33 cl', '2001000000097', 'Coca-Cola', '6 x 33 cl'),
-       ('Yaourt nature pack 4 x 125 g', '2001000000103', 'Danone', '4 x 125 g'),
        ('Yaourt à la fraise pack 4 x 125 g', '2001000000110', 'Danone', '4 x 125 g'),
        ('Yaourt nature au lait entier 8 x 125 g', '2001000000127', 'Marque Repère', '8 x 125 g'),
        ('Farine de blé T45 1 kg', '2001000000134', 'Francine', '1 kg'),

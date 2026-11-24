@@ -137,7 +137,7 @@ Le prototype antérieur (`/api/v1/liste-experimentale`, profil `liste-experiment
 
 ### Catalogue de démonstration
 
-`src/main/resources/db/demo/R__donnees_demo.sql`, chargé uniquement avec le profil `demo`. Section F1 : 17 produits précis fictifs (codes `2001000000xxx`, plage interne jamais attribuée à un vrai produit) et 11 besoins génériques, de quoi jouer le scénario du dossier (« lait », « pâtes barilla », « coca 6 », « yaort »). Le script est idempotent (`DonneesDemoScenarioIT`). Les autres features ajoutent leur section à la suite, avec leur propre plage de codes.
+`src/main/resources/db/demo/R__donnees_demo.sql`, chargé uniquement avec le profil `demo`. Section F1 : 9 produits précis fictifs (codes `2001000000xxx`, plage interne jamais attribuée à un vrai produit : packs Coca-Cola 6 x 33 cl, farine, lessive, gobelets…) et 11 besoins génériques. Le scénario du dossier (« lait », « pâtes barilla », « coca 6 », « yaort ») se joue avec ces fiches et avec les 20 fiches réelles Open Food Facts de `R__images_open_food_facts.sql` (laits Lactel, pâtes Barilla, Coca-Cola, yaourts Danone…), qui remplacent depuis le 24 novembre 2026 les anciens doublons fictifs. Ces doublons sont supprimés des bases de démo existantes au prochain démarrage, sauf s'ils figurent encore dans une liste, un relevé de prix ou une proposition modérée. Le script est idempotent (`DonneesDemoScenarioIT`). Les autres features ajoutent leur section à la suite, avec leur propre plage de codes.
 
 ### Recréer sa base locale
 
@@ -157,7 +157,7 @@ Pour relire l'ancienne sauvegarde, la restaurer dans une base séparée : `docke
 
 ### Petit jeu Open Food Facts
 
-Un instantané de trois fiches réelles est disponible dans `src/main/resources/db/import/open-food-facts-petit-jeu.sql` : images vérifiées le 19 novembre 2026, marques et formats le 20 novembre 2026. Ce n'est pas un import représentatif de la France. Le profil `demo` le charge au démarrage (copie `db/demo/R__images_open_food_facts.sql`) pour que le catalogue montre des photos ; sans ce profil, il ne s'exécute jamais. Le script exige la V4 actuelle ; l'exécuter volontairement depuis `back` :
+Un instantané de trois fiches réelles est disponible dans `src/main/resources/db/import/open-food-facts-petit-jeu.sql` : images vérifiées le 19 novembre 2026, marques et formats le 20 novembre 2026. Ce n'est pas un import représentatif de la France. Le profil `demo` le charge au démarrage via `db/demo/R__images_open_food_facts.sql`, qui y ajoute 17 autres fiches réelles avec photo (codes, images et auteurs vérifiés sur l'API Open Food Facts le 24 novembre 2026) ; sans ce profil, il ne s'exécute jamais. Les produits sans photo affichent une illustration générique selon leur famille (lait, boisson, pâtes…), déduite du libellé. Le script exige la V4 actuelle ; l'exécuter volontairement depuis `back` :
 
 ```powershell
 Get-Content -Raw .\src\main\resources\db\import\open-food-facts-petit-jeu.sql | docker compose exec -T db psql -v ON_ERROR_STOP=1 -U kadi -d kadi
