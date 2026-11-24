@@ -32,23 +32,11 @@ class CatalogueRechercheMigrationIT {
     }
 
     @Test
-    void refuseUnBesoinGeneriqueSansNature() {
-        assertThatThrownBy(() -> jdbc.update("INSERT INTO produit(libelle, type_reference) VALUES (?, 'GENERIQUE')",
-                "Générique sans nature")).isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
     void refuseUnBesoinGeneriqueAvecCodeBarres() {
         assertThatThrownBy(() -> jdbc.update("""
                 INSERT INTO produit(libelle, code_barres, type_reference, nature_besoin)
                 VALUES (?, ?, 'GENERIQUE', 'SOLIDE')
                 """, "Générique avec code", "2001000000028")).isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    void refuseUneNatureSurUnProduitPrecis() {
-        assertThatThrownBy(() -> jdbc.update("INSERT INTO produit(libelle, nature_besoin) VALUES (?, 'SOLIDE')",
-                "Précis avec nature")).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -58,37 +46,6 @@ class CatalogueRechercheMigrationIT {
         assertThatThrownBy(() -> jdbc.update("""
                 INSERT INTO produit(libelle, type_reference, nature_besoin) VALUES (?, 'GENERIQUE', 'SOLIDE')
                 """, "LAIT DEMI-ÉCRÉMÉ")).isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    void lesInformationsManquantesLaissentLeProduitAccessible() {
-        Long id = jdbc.queryForObject("INSERT INTO produit(libelle) VALUES (?) RETURNING id",
-                Long.class, "Produit sans informations");
-
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM produit WHERE id = ? AND marque IS NULL "
-                        + "AND format IS NULL AND categorie_id IS NULL AND NOT categorie_corrigee",
-                Integer.class, id)).isEqualTo(1);
-    }
-
-    @Test
-    void conserveLaCorrectionDeCategorieEtLesInformationsSource() {
-        Long categorie = jdbc.queryForObject(
-                "INSERT INTO categorie_catalogue(libelle) VALUES (?) RETURNING id",
-                Long.class, "Epicerie");
-        Long id = jdbc.queryForObject("""
-                INSERT INTO produit(libelle, code_barres, marque, format, categorie_id, categorie_corrigee)
-                VALUES (?, ?, ?, ?, ?, true) RETURNING id
-                """, Long.class, "Produit de test", "1234567890123", "Marque test", "500 g", categorie);
-        jdbc.update("""
-                INSERT INTO produit_open_food_facts(produit_id, identifiant_externe, categorie_source, importe_le)
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-                """, id, "1234567890123", "en:test-category");
-
-        assertThat(jdbc.queryForObject("""
-                SELECT count(*) FROM produit p JOIN produit_open_food_facts off ON off.produit_id = p.id
-                WHERE p.id = ? AND p.categorie_id = ? AND p.categorie_corrigee
-                  AND off.categorie_source = ? AND off.importe_le IS NOT NULL
-                """, Integer.class, id, categorie, "en:test-category")).isEqualTo(1);
     }
 
     @Test

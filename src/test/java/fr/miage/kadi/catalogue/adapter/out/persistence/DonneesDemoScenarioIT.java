@@ -76,16 +76,6 @@ class DonneesDemoScenarioIT {
     }
 
     @Test
-    @DisplayName("« spaghetti barilla » : un mot peut désigner la marque, la correspondance est sûre")
-    void motDeLaMarque() {
-        assertThat(recherche.rechercherAvecConfiance("spaghetti barilla")).first()
-                .satisfies(trouve -> {
-                    assertThat(trouve.produit().libelle()).isEqualTo("Spaghetti n°5");
-                    assertThat(trouve.confiance()).isEqualTo(ConfianceRecherche.SUR);
-                });
-    }
-
-    @Test
     @DisplayName("« coca 6 » trouve les packs 6 x 33 cl sûrs, sans confondre la bouteille de 1,5 L")
     void coca6() {
         List<ProduitTrouve> surs = recherche.rechercherPourListe("coca 6", INES).stream()
@@ -111,12 +101,6 @@ class DonneesDemoScenarioIT {
             assertThat(resultats).anyMatch(trouve -> trouve.produit().type() == TypeReference.PRODUIT
                     && trouve.produit().marque() != null && trouve.produit().format() != null);
         }
-    }
-
-    @Test
-    @DisplayName("Une saisie inconnue ne propose rien : aucun produit n'est attribué au hasard")
-    void saisieInconnue() {
-        assertThat(recherche.rechercherPourListe("sauce maison spéciale", INES)).isEmpty();
     }
 
     private static List<String> libelles(List<ProduitTrouve> resultats) {

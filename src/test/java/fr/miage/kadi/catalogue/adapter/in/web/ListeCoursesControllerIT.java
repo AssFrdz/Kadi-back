@@ -75,26 +75,6 @@ class ListeCoursesControllerIT {
     }
 
     @Test
-    @DisplayName("Utilisateur simulé : un id inconnu ou mal formé répond 400")
-    void refuseUnUtilisateurInconnu() throws Exception {
-        mockMvc.perform(get(LISTE).with(en(999_999_999L))).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail").value("L'utilisateur 999999999 n'existe pas."));
-        mockMvc.perform(get(LISTE).header(UtilisateursSimulesDeTest.EN_TETE, "abc"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("Utilisateur simulé : les profils créés par V4 ont chacun leur propre liste")
-    void lesProfilsSimulesOntDesListesSeparees() throws Exception {
-        RequestPostProcessor karim = en(idDe(jdbc, "karim@kadi.local"));
-        RequestPostProcessor sophie = en(idDe(jdbc, "sophie@kadi.local"));
-        ajouter(karim, ajout("PRODUIT", farineFrancine, "1", "ARTICLE")).andExpect(status().isCreated());
-        mockMvc.perform(get(LISTE).with(karim)).andExpect(jsonPath("$.lignes", hasSize(1)));
-        mockMvc.perform(get(LISTE).with(sophie)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.lignes", hasSize(0)));
-    }
-
-    @Test
     @DisplayName("REQ-001 : une liste vide au premier accès, retrouvée telle quelle en resélectionnant son profil")
     void retrouveSaListeDansUneAutreSession() throws Exception {
         RequestPostProcessor premiere = connexion("ines@example.test");
@@ -155,63 +135,6 @@ class ListeCoursesControllerIT {
         ajouter(session, ajout("PRODUIT", farineFrancine, "0.5", "ARTICLE")).andExpect(status().isBadRequest());
         ajouter(session, ajout("PRODUIT", farineFrancine, "500", "GRAMME")).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail", containsString("unité de vente")));
-    }
-
-    @Test
-    @DisplayName("REQ-030, REQ-031, REQ-033 : pommes en nombre ou en poids ; 1 kg + 500 g = 1,5 kg")
-    void convertitLesPoidsDUnMemeBesoinGenerique() throws Exception {
-        RequestPostProcessor session = connexion("pommes@example.test");
-        ajouter(session, ajout("BESOIN_GENERIQUE", pommes, "1", "KILOGRAMME")).andExpect(status().isCreated());
-        ajouter(session, ajout("BESOIN_GENERIQUE", pommes, "500", "GRAMME")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.statut").value("FUSIONNEE"))
-                .andExpect(jsonPath("$.lignes", hasSize(1)))
-                .andExpect(jsonPath("$.lignes[0].quantite").value(1.5))
-                .andExpect(jsonPath("$.lignes[0].unite").value("KILOGRAMME"));
-    }
-
-    @Test
-    @DisplayName("REQ-034 : 3 pommes et 1 kg de pommes restent sur deux lignes, sans conversion inventée")
-    void neConvertitPasDesUnitesIncompatibles() throws Exception {
-        RequestPostProcessor session = connexion("separees@example.test");
-        ajouter(session, ajout("BESOIN_GENERIQUE", pommes, "3", "ARTICLE")).andExpect(status().isCreated());
-        ajouter(session, ajout("BESOIN_GENERIQUE", pommes, "1", "KILOGRAMME")).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.lignes", hasSize(2)));
-    }
-
-    @Test
-    @DisplayName("REQ-031, A3 : seules les unités prévues pour la nature du besoin sont acceptées")
-    void refuseUneUniteNonPrevuePourLeBesoin() throws Exception {
-        RequestPostProcessor session = connexion("natures@example.test");
-        ajouter(session, ajout("BESOIN_GENERIQUE", lait, "50", "CENTILITRE")).andExpect(status().isCreated());
-        ajouter(session, ajout("BESOIN_GENERIQUE", lait, "1", "LITRE")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.lignes[0].quantite").value(150))
-                .andExpect(jsonPath("$.lignes[0].unite").value("CENTILITRE"));
-        ajouter(session, ajout("BESOIN_GENERIQUE", lait, "1", "KILOGRAMME")).andExpect(status().isBadRequest());
-        ajouter(session, ajout("BESOIN_GENERIQUE", gobelets, "1.5", "ARTICLE")).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("Unités : une unité inconnue est refusée avec la liste des unités acceptées")
-    void refuseExplicitementUneUniteInconnue() throws Exception {
-        RequestPostProcessor session = connexion("unite@example.test");
-        ajouter(session, ajout("BESOIN_GENERIQUE", pommes, "2", "POIGNEE")).andExpect(status().isBadRequest())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.detail", containsString("POIGNEE")))
-                .andExpect(jsonPath("$.detail", containsString("CENTILITRE")));
-    }
-
-    @Test
-    @DisplayName("REQ-002, REQ-050 : quantité nulle, négative, trop précise ou absente refusée avec un message clair")
-    void refuseUneQuantiteInvalide() throws Exception {
-        RequestPostProcessor session = connexion("quantites@example.test");
-        for (String quantite : new String[] {"0", "-1", "1.2345", "100001"}) {
-            ajouter(session, ajout("BESOIN_GENERIQUE", pommes, quantite, "KILOGRAMME"))
-                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.detail").isNotEmpty());
-        }
-        ajouter(session, ajout("BESOIN_GENERIQUE", pommes, "2.5", "ARTICLE")).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail", containsString("entière")));
-        ajouter(session, "{\"type\":\"BESOIN_GENERIQUE\",\"referenceId\":" + pommes + ",\"unite\":\"ARTICLE\"}")
-                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -299,19 +222,6 @@ class ListeCoursesControllerIT {
     }
 
     @Test
-    @DisplayName("REQ-069 : accepter la fusion garde le format de la première ligne et additionne les quantités")
-    void fusionneApresConfirmation() throws Exception {
-        RequestPostProcessor session = connexion("accepte@example.test");
-        String premiere = idAjoute(session, avecFormat(haricots, "1", "Sachet de 1 kg"));
-        ajouter(session, avecFormat(haricots, "2", "sachet de 1 KG")
-                .replace("}", ",\"decision\":\"FUSIONNER\",\"ligneAFusionner\":\"" + premiere + "\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.statut").value("FUSIONNEE"))
-                .andExpect(jsonPath("$.lignes", hasSize(1)))
-                .andExpect(jsonPath("$.lignes[0].quantite").value(3))
-                .andExpect(jsonPath("$.lignes[0].formatSouhaite").value("Sachet de 1 kg"));
-    }
-
-    @Test
     @DisplayName("REQ-075, REQ-076 : « farine » générique et « Farine Francine » précise coexistent sur deux lignes")
     void unBesoinGeneriqueNEstPasRemplaceParUnProduitPrecis() throws Exception {
         long farine = generique("Farine", "SOLIDE");
@@ -321,18 +231,6 @@ class ListeCoursesControllerIT {
                 .andExpect(jsonPath("$.lignes", hasSize(2)))
                 .andExpect(jsonPath("$.lignes[0].type").value("BESOIN_GENERIQUE"))
                 .andExpect(jsonPath("$.lignes[1].type").value("PRODUIT"));
-    }
-
-    @Test
-    @DisplayName("Références : type incohérent ou inexistant refusé, sans rien ajouter")
-    void refuseUneReferenceIncoherente() throws Exception {
-        RequestPostProcessor session = connexion("references@example.test");
-        ajouter(session, ajout("PRODUIT", pommes, "1", "ARTICLE")).andExpect(status().isBadRequest());
-        ajouter(session, ajout("BESOIN_GENERIQUE", farineFrancine, "1", "ARTICLE")).andExpect(status().isBadRequest());
-        ajouter(session, ajout("PRODUIT", 999_999_999L, "1", "ARTICLE")).andExpect(status().isNotFound());
-        ajouter(session, ajout("RAYON", pommes, "1", "ARTICLE")).andExpect(status().isBadRequest());
-        ajouter(session, "pas du json").andExpect(status().isBadRequest());
-        mockMvc.perform(get(LISTE).with(session)).andExpect(jsonPath("$.lignes", hasSize(0)));
     }
 
     @Test

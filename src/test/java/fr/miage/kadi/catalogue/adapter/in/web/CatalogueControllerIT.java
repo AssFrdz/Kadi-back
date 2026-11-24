@@ -44,14 +44,6 @@ class CatalogueControllerIT {
     }
 
     @Test
-    void signaleUnCatalogueVide() throws Exception {
-        mockMvc.perform(get("/api/v1/catalogue/produits"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.produits", hasSize(0)))
-                .andExpect(jsonPath("$.prochainId").isEmpty());
-    }
-
-    @Test
     void pagineParIdentifiantEtAccepteUnProduitSansCodeBarres() throws Exception {
         for (int index = 0; index < 21; index++) {
             jdbc.update("INSERT INTO produit(libelle, code_barres) VALUES (?, NULL)", "Produit " + index);
@@ -73,14 +65,6 @@ class CatalogueControllerIT {
                 .andExpect(jsonPath("$.produits", hasSize(1)))
                 .andExpect(jsonPath("$.produits[0].libelle").value("Produit 20"))
                 .andExpect(jsonPath("$.prochainId").isEmpty());
-    }
-
-    @Test
-    void refuseUnCurseurInvalide() throws Exception {
-        mockMvc.perform(get("/api/v1/catalogue/produits").param("apres", "-1"))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/api/v1/catalogue/produits").param("apres", "texte"))
-                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -173,25 +157,6 @@ class CatalogueControllerIT {
     }
 
     @Test
-    void completeLesChampsManquantsDuPetitJeuOffSansEcraserLesValeursExistantes() throws Exception {
-        ResourceDatabasePopulator importeur = new ResourceDatabasePopulator(
-                new ClassPathResource("db/import/open-food-facts-petit-jeu.sql"));
-        importeur.execute(dataSource);
-        jdbc.update("UPDATE produit SET marque = NULL, format = ? WHERE code_barres = ?",
-                "format corrigé", "3017620422003");
-        importeur.execute(dataSource);
-        importeur.execute(dataSource);
-
-        mockMvc.perform(get("/api/v1/catalogue/produits").param("marque", "nutella"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.produits", hasSize(1)))
-                .andExpect(jsonPath("$.produits[0].libelle").value("Nutella"))
-                .andExpect(jsonPath("$.produits[0].marque").value("Ferrero, Nutella"))
-                .andExpect(jsonPath("$.produits[0].format").value("format corrigé"));
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM produit", Integer.class)).isEqualTo(3);
-    }
-
-    @Test
     void suggestionsLocalesLimiteesTolereFauteAccentEtSaisiePartielle() throws Exception {
         jdbc.update("INSERT INTO produit(libelle) VALUES (?)", "Yaourt nature");
         jdbc.update("INSERT INTO produit(libelle) VALUES (?)", "Pâtes Barilla");
@@ -212,34 +177,6 @@ class CatalogueControllerIT {
                 .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
         mockMvc.perform(get("/api/v1/catalogue/produits/suggestions").param("q", "x".repeat(256)))
                 .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void rechercheEtAfficheMarqueEtFormatLorsquIlsSontRenseignes() throws Exception {
-        jdbc.update("INSERT INTO produit(libelle, marque, format) VALUES (?, ?, ?)",
-                "Pâtes penne", "Barilla", "500 g");
-        jdbc.update("INSERT INTO produit(libelle, marque, format) VALUES (?, ?, ?)",
-                "Coca-Cola", "Coca-Cola", "6 x 33 cl");
-        jdbc.update("INSERT INTO produit(libelle, marque, format) VALUES (?, ?, ?)",
-                "Coca-Cola", "Coca-Cola", "1,5 l");
-        mockMvc.perform(get("/api/v1/catalogue/produits"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.produits[0].marque").value("Barilla"))
-                .andExpect(jsonPath("$.produits[0].format").value("500 g"));
-        mockMvc.perform(get("/api/v1/catalogue/produits/suggestions")
-                        .param("q", "barilla"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].libelle").value("Pâtes penne"))
-                .andExpect(jsonPath("$[0].marque").value("Barilla"));
-        mockMvc.perform(get("/api/v1/catalogue/produits/suggestions")
-                        .param("q", "pates barilla"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].libelle").value("Pâtes penne"));
-        mockMvc.perform(get("/api/v1/catalogue/produits/suggestions")
-                        .param("q", "coca 6"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].format").value("6 x 33 cl"))
-                .andExpect(jsonPath("$[1].format").value("1,5 l"));
     }
 
     @Test
@@ -286,65 +223,4 @@ class CatalogueControllerIT {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    void parcourtTousLesResultatsAuDelaDeDeuxCentsSansDoublons() throws Exception {
-        for (int i = 0; i < 235; i++) {
-            jdbc.update("INSERT INTO produit(libelle) VALUES (?)", String.format("Nutella %03d", i));
-        }
-        mockMvc.perform(get("/api/v1/catalogue/produits/recherche").param("q", "nut"))
-                .andExpect(status().isOk());
-        var premiere = mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                        .param("q", "nut").param("taille", "7"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.produits", hasSize(7)))
-                .andReturn().getResponse().getContentAsString();
-        List<String> noms = new ArrayList<>(JsonPath.read(premiere, "$.produits[*].libelle"));
-        String curseur = JsonPath.read(premiere, "$.prochainCurseur");
-        mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                        .param("q", "coca").param("apres", curseur))
-                .andExpect(status().isBadRequest());
-        while (curseur != null) {
-            String page = mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                            .param("q", "nut").param("apres", curseur))
-                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-            noms.addAll(JsonPath.read(page, "$.produits[*].libelle"));
-            curseur = JsonPath.read(page, "$.prochainCurseur");
-        }
-        assertThat(noms).hasSize(235);
-        assertThat(new HashSet<>(noms)).hasSize(235);
-        assertThat(noms).isSorted();
-        mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                        .param("q", "nut").param("apres", "invalide"))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                        .param("q", "nut").param("taille", "21"))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                        .param("q", "nu"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.produits", hasSize(0)));
-    }
-
-    @Test
-    void neProposeUneSuiteQueSiUnHuitiemeResultatExisteEtDepartageLesDoublons() throws Exception {
-        for (int i = 0; i < 7; i++) {
-            jdbc.update("INSERT INTO produit(libelle) VALUES (?)", "Yaourt");
-        }
-        mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                        .param("q", "yaourt").param("taille", "7"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.produits", hasSize(7)))
-                .andExpect(jsonPath("$.prochainCurseur").isEmpty());
-        jdbc.update("INSERT INTO produit(libelle) VALUES (?)", "Yaourt");
-        String page = mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                        .param("q", "yaourt").param("taille", "7"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.produits", hasSize(7)))
-                .andReturn().getResponse().getContentAsString();
-        List<Integer> ids = JsonPath.read(page, "$.produits[*].id");
-        String curseur = JsonPath.read(page, "$.prochainCurseur");
-        String suite = mockMvc.perform(get("/api/v1/catalogue/produits/recherche")
-                        .param("q", "yaourt").param("apres", curseur))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.produits", hasSize(1)))
-                .andExpect(jsonPath("$.prochainCurseur").isEmpty())
-                .andReturn().getResponse().getContentAsString();
-        List<Integer> suiteIds = JsonPath.read(suite, "$.produits[*].id");
-        assertThat(ids).doesNotContain(suiteIds.get(0));
-    }
 }

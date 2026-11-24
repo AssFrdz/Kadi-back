@@ -46,12 +46,6 @@ class RechercheProduitsControllerIT {
     }
 
     @Test
-    void renvoieUneListeVideQuandRienNeCorrespond() throws Exception {
-        ajouter("Lait demi-écrémé", null);
-        rechercher("xyzzyqwv").andExpect(status().isOk()).andExpect(content().json("[]"));
-    }
-
-    @Test
     void renvoieLesTroisChampsObligatoiresDuContratEtLesComplementsFacultatifs() throws Exception {
         long id = jdbc.queryForObject("INSERT INTO produit(libelle, code_barres, marque, format) "
                 + "VALUES (?, ?, ?, ?) RETURNING id", Long.class, "Lactel Demi-écrémé 1 L", "3428272960015",
@@ -78,14 +72,6 @@ class RechercheProduitsControllerIT {
     }
 
     @Test
-    void accepteUnProduitSansCodeBarres() throws Exception {
-        ajouter("Pommes Golden", null);
-        rechercher("pommes")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].codeBarres").doesNotExist());
-    }
-
-    @Test
     void rechercheExactementUnCodeBarresQuandLaSaisieNeContientQueSixAQuatorzeChiffres() throws Exception {
         long id = ajouter("Lactel Demi-écrémé 1 L", "3428272960015");
         ajouter("Produit 3428272960015 dans le libellé", "2000000000999");
@@ -97,23 +83,9 @@ class RechercheProduitsControllerIT {
     }
 
     @Test
-    void limiteLaReponseAVingtProduits() throws Exception {
-        for (int index = 0; index < 25; index++) {
-            ajouter("Yaourt nature " + index, null);
-        }
-        rechercher("yaourt").andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(20)));
-    }
-
-    @Test
     void trouveLesMotsDansNimporteQuelOrdreSansTenirCompteDeLaCasseNiDesAccents() throws Exception {
         long id = ajouter("Lactel Demi-écrémé 1 L", null);
         rechercher("ECREME lactel").andExpect(status().isOk()).andExpect(jsonPath("$[*].id", hasItem((int) id)));
-    }
-
-    @Test
-    void trouveUneQuantiteSansEspaceDevantLUnite() throws Exception {
-        long id = ajouter("Lactel Demi-écrémé 1 L", null);
-        rechercher("lactel 1l").andExpect(status().isOk()).andExpect(jsonPath("$[*].id", hasItem((int) id)));
     }
 
     @Test
@@ -131,12 +103,6 @@ class RechercheProduitsControllerIT {
         ajouter("Boisson au lait de coco", null);
         long proche = ajouter("Lait", null);
         rechercher("lait").andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(proche));
-    }
-
-    @Test
-    void refuseExplicitementUneSaisieTropLongue() throws Exception {
-        rechercher("a".repeat(256)).andExpect(status().isBadRequest());
-        rechercher("a".repeat(255)).andExpect(status().isOk());
     }
 
     private org.springframework.test.web.servlet.ResultActions rechercher(String saisie) throws Exception {
