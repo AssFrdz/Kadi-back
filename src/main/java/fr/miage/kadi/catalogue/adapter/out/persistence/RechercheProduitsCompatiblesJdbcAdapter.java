@@ -72,7 +72,7 @@ class RechercheProduitsCompatiblesJdbcAdapter implements RechercheProduitsCompat
 
     @Override
     public List<ProduitRechercheCompatible> listerBesoinsPersonnels(IdentifiantCompte proprietaire) {
-        return jdbc.query("SELECT id, libelle FROM besoin_personnalise WHERE compte_id = ? ORDER BY id",
+        return jdbc.query("SELECT id, libelle FROM besoin_personnalise WHERE compte_id = ? AND statut <> 'VALIDE' ORDER BY id",
                 (resultat, ligne) -> new ProduitRechercheCompatible(resultat.getLong("id"),
                         resultat.getString("libelle"), null, null, null, TypeReference.BESOIN_PERSONNALISE, null),
                 proprietaire.valeur());

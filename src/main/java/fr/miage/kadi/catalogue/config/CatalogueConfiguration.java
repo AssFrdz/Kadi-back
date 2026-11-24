@@ -1,11 +1,13 @@
 package fr.miage.kadi.catalogue.config;
 
 import fr.miage.kadi.catalogue.application.port.out.ListePersonnelleRepository;
+import fr.miage.kadi.catalogue.application.port.out.PropositionsBesoinRepository;
 import fr.miage.kadi.catalogue.application.port.out.ProduitsCatalogueRepository;
 import fr.miage.kadi.catalogue.application.port.out.ReferencesListeRepository;
 import fr.miage.kadi.catalogue.application.port.out.RechercheProduitsCompatiblesRepository;
 import fr.miage.kadi.catalogue.application.service.ConsulterCatalogueService;
 import fr.miage.kadi.catalogue.application.service.GererListeCoursesService;
+import fr.miage.kadi.catalogue.application.service.ModererBesoinsService;
 import fr.miage.kadi.catalogue.application.service.RechercherCatalogueService;
 import fr.miage.kadi.catalogue.application.service.RechercherProduitsCompatiblesService;
 import org.springframework.context.annotation.Bean;
@@ -34,5 +36,10 @@ class CatalogueConfiguration {
     GererListeCoursesService gererListeCoursesService(ListePersonnelleRepository listes,
             ReferencesListeRepository references) {
         return new GererListeCoursesService(listes, references);
+    }
+
+    @Bean
+    ModererBesoinsService modererBesoinsService(PropositionsBesoinRepository propositions) {
+        return new ModererBesoinsService(propositions);
     }
 }
