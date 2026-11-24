@@ -6,12 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.annotation.Transactional;
-import javax.sql.DataSource;
 
 @SpringBootTest
 @Transactional
@@ -19,29 +16,48 @@ class CatalogueRechercheMigrationIT {
     @Autowired
     private JdbcTemplate jdbc;
 
-    @Autowired
-    private DataSource dataSource;
+    @Test
+    void distingueLesBesoinsGeneriquesDesProduitsPrecis() {
+        Long precis = jdbc.queryForObject("INSERT INTO produit(libelle, code_barres) VALUES (?, ?) RETURNING id",
+                Long.class, "Lactel Demi-écrémé 1 L", "2001000000011");
+        Long generique = jdbc.queryForObject("""
+                INSERT INTO produit(libelle, type_reference, nature_besoin) VALUES (?, 'GENERIQUE', 'LIQUIDE')
+                RETURNING id
+                """, Long.class, "Lait demi-écrémé");
+
+        assertThat(jdbc.queryForObject("SELECT type_reference FROM produit WHERE id = ?", String.class, precis))
+                .isEqualTo("PRECIS");
+        assertThat(jdbc.queryForObject("SELECT nature_besoin FROM produit WHERE id = ?", String.class, generique))
+                .isEqualTo("LIQUIDE");
+    }
 
     @Test
-    void metANiveauLesProduitsOffDeLaVersionQuatreSansLesModifier() {
-        jdbc.execute("CREATE SCHEMA migration_f1_test");
-        jdbc.execute("SET LOCAL search_path TO migration_f1_test, public");
-        new ResourceDatabasePopulator(
-                new ClassPathResource("db/migration/V1__modele_commun.sql"),
-                new ClassPathResource("db/migration/V4__comptes_utilisateur.sql")).execute(dataSource);
-        Long id = jdbc.queryForObject("INSERT INTO produit(libelle, code_barres) VALUES (?, ?) RETURNING id",
-                Long.class, "Ancien produit", "1234567890123");
-        jdbc.update("INSERT INTO produit_open_food_facts(produit_id, image_url, image_auteur) VALUES (?, ?, ?)",
-                id, "https://images.openfoodfacts.org/test.jpg", "auteur-test");
+    void refuseUnBesoinGeneriqueSansNature() {
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO produit(libelle, type_reference) VALUES (?, 'GENERIQUE')",
+                "Générique sans nature")).isInstanceOf(DataIntegrityViolationException.class);
+    }
 
-        new ResourceDatabasePopulator(
-                new ClassPathResource("db/migration/V5__catalogue_recherche_temporaire.sql")).execute(dataSource);
+    @Test
+    void refuseUnBesoinGeneriqueAvecCodeBarres() {
+        assertThatThrownBy(() -> jdbc.update("""
+                INSERT INTO produit(libelle, code_barres, type_reference, nature_besoin)
+                VALUES (?, ?, 'GENERIQUE', 'SOLIDE')
+                """, "Générique avec code", "2001000000028")).isInstanceOf(DataIntegrityViolationException.class);
+    }
 
-        assertThat(jdbc.queryForObject("""
-                SELECT count(*) FROM produit p JOIN produit_open_food_facts off ON off.produit_id = p.id
-                WHERE p.id = ? AND p.libelle = ? AND off.identifiant_externe = ?
-                  AND off.image_auteur = ? AND p.marque IS NULL AND p.categorie_id IS NULL
-                """, Integer.class, id, "Ancien produit", "1234567890123", "auteur-test")).isEqualTo(1);
+    @Test
+    void refuseUneNatureSurUnProduitPrecis() {
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO produit(libelle, nature_besoin) VALUES (?, 'SOLIDE')",
+                "Précis avec nature")).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void refuseDeuxBesoinsGeneriquesDeMemeLibelleSansDistinctionDeCasse() {
+        jdbc.update("INSERT INTO produit(libelle, type_reference, nature_besoin) VALUES (?, 'GENERIQUE', 'LIQUIDE')",
+                "Lait demi-écrémé");
+        assertThatThrownBy(() -> jdbc.update("""
+                INSERT INTO produit(libelle, type_reference, nature_besoin) VALUES (?, 'GENERIQUE', 'SOLIDE')
+                """, "LAIT DEMI-ÉCRÉMÉ")).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test

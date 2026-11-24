@@ -1,9 +1,24 @@
 package fr.miage.kadi.catalogue.domain.model;
 
-public record FiltresCatalogue(String marque, String format) {
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public record FiltresCatalogue(String marque, String format, Set<NutriScore> nutriScores) {
+    public FiltresCatalogue(String marque, String format) {
+        this(marque, format, Set.of());
+    }
+
     public FiltresCatalogue {
         marque = nettoyer(marque);
         format = nettoyer(format);
+        if (nutriScores == null || nutriScores.stream().anyMatch(score -> score == null)) {
+            throw new IllegalArgumentException("La sélection Nutri-Score est invalide.");
+        }
+        nutriScores = Set.copyOf(nutriScores);
+    }
+
+    public String cleNutriScores() {
+        return nutriScores.stream().sorted().map(Enum::name).collect(Collectors.joining(","));
     }
 
     private static String nettoyer(String valeur) {

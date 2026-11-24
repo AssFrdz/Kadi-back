@@ -33,6 +33,14 @@ public final class SimilariteRecherche {
         return score;
     }
 
+    /**
+     * Ressemblance de Dice entre la saisie normalisée et le libellé entier, sans le bonus des sous-chaînes :
+     * sert à départager les libellés qui contiennent tous la saisie (« Lait » avant « Boisson au lait »).
+     */
+    public static double proximiteLibelle(String recherche, String libelle) {
+        return dice(recherche, normaliser(libelle));
+    }
+
     public static double scoreProduit(String recherche, ProduitCatalogue produit) {
         String marque = produit.marque() == null ? "" : produit.marque();
         String format = produit.format() == null ? "" : produit.format();

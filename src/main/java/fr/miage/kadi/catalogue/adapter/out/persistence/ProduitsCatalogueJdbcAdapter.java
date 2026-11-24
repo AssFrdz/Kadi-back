@@ -3,6 +3,7 @@ package fr.miage.kadi.catalogue.adapter.out.persistence;
 import fr.miage.kadi.catalogue.application.port.out.ProduitsCatalogueRepository;
 import fr.miage.kadi.catalogue.domain.model.ProduitCatalogue;
 import fr.miage.kadi.catalogue.domain.model.FiltresCatalogue;
+import java.util.ArrayList;
 import java.util.List;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
 
-    private static final String CANDIDATS_SQL = """
+    static final String CANDIDATS_SQL = """
             SELECT p.id, p.libelle, p.code_barres, p.marque, p.format, off.produit_id AS off_id,
                    off.image_url, off.image_auteur
             FROM produit p
@@ -25,16 +26,20 @@ class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
                     'ÀÂÄÁÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸàâäáãåçéèêëíìîïñóòôöõúùûüýÿ',
                     'AAAAAACEEEEIIIINOOOOOUUUUYYaaaaaaceeeeiiiinooooouuuuyy')) AS nom
             ) normalise
-            WHERE word_similarity(?, normalise.nom) >= 0.2
+            WHERE p.type_reference = 'PRECIS' AND word_similarity(?, normalise.nom) >= 0.2
             """;
 
-    private static final String FILTRES_SQL = """
+    // Le catalogue F1 ne présente que les produits précis : les besoins génériques sont proposés dans « Ma liste ».
+    static final String FILTRES_SQL = """
+            AND p.type_reference = 'PRECIS'
             AND (? = '' OR EXISTS (
                 SELECT 1 FROM unnest(string_to_array(p.marque, ',')) AS marque(valeur)
                 WHERE lower(trim(marque.valeur)) = lower(?)
             ))
             AND (? = '' OR position(lower(?) IN lower(p.format)) > 0)
             """;
+
+    private static final String CLE_NOM = NormalisationCatalogueSql.EXPRESSION + " COLLATE \"C\"";
 
     private final JdbcTemplate jdbc;
 
@@ -49,18 +54,45 @@ class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
 
     @Override
     public List<ProduitCatalogue> trouverApres(long dernierId, int limite, FiltresCatalogue filtres) {
-        return jdbc.query("""
+        String sql = """
                 SELECT p.id, p.libelle, p.code_barres, p.marque, p.format, off.produit_id AS off_id,
                        off.image_url, off.image_auteur
                 FROM produit p
                 LEFT JOIN produit_open_food_facts off ON off.produit_id = p.id
                 WHERE p.id > ?
-                """ + FILTRES_SQL + """
+                """ + FILTRES_SQL + filtreNutriScore(filtres) + """
                 ORDER BY p.id
                 LIMIT ?
-                """,
-                (resultat, ligne) -> lireProduit(resultat),
-                dernierId, filtres.marque(), filtres.marque(), filtres.format(), filtres.format(), limite);
+                """;
+        List<Object> parametres = new ArrayList<>();
+        parametres.add(dernierId);
+        ajouterFiltres(parametres, filtres);
+        parametres.add(limite);
+        return jdbc.query(sql, (resultat, ligne) -> lireProduit(resultat), parametres.toArray());
+    }
+
+    @Override
+    public List<ProduitCatalogue> trouverParNom(String apresNom, long apresId, int limite, FiltresCatalogue filtres) {
+        String cle = CLE_NOM.formatted("p.libelle");
+        String sql = """
+                SELECT p.id, p.libelle, p.code_barres, p.marque, p.format, off.produit_id AS off_id,
+                       off.image_url, off.image_auteur
+                FROM produit p
+                LEFT JOIN produit_open_food_facts off ON off.produit_id = p.id
+                WHERE true
+                """ + FILTRES_SQL + filtreNutriScore(filtres);
+        if (apresNom != null) {
+            sql += " AND (" + cle + ", p.id) > (" + CLE_NOM.formatted("?") + ", ?)";
+        }
+        sql += " ORDER BY " + cle + ", p.id LIMIT ?";
+        List<Object> parametres = new ArrayList<>();
+        ajouterFiltres(parametres, filtres);
+        if (apresNom != null) {
+            parametres.add(apresNom);
+            parametres.add(apresId);
+        }
+        parametres.add(limite);
+        return jdbc.query(sql, (resultat, ligne) -> lireProduit(resultat), parametres.toArray());
     }
 
     @Override
@@ -73,17 +105,59 @@ class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
     @Transactional(readOnly = true)
     public void parcourirCandidats(String recherche, FiltresCatalogue filtres, Consumer<ProduitCatalogue> consommateur) {
         jdbc.query(connexion -> {
-            PreparedStatement requete = connexion.prepareStatement(CANDIDATS_SQL + FILTRES_SQL);
+            PreparedStatement requete = connexion.prepareStatement(CANDIDATS_SQL + FILTRES_SQL + filtreNutriScore(filtres));
             requete.setString(1, recherche);
             requete.setString(2, filtres.marque());
             requete.setString(3, filtres.marque());
             requete.setString(4, filtres.format());
             requete.setString(5, filtres.format());
+            if (!filtres.nutriScores().isEmpty()) {
+                requete.setString(6, filtres.cleNutriScores());
+            }
             requete.setFetchSize(256);
             return requete;
         }, resultat -> {
             consommateur.accept(lireProduit(resultat));
         });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void parcourirCatalogue(FiltresCatalogue filtres, Consumer<ProduitCatalogue> consommateur) {
+        jdbc.query(connexion -> {
+            PreparedStatement requete = connexion.prepareStatement("""
+                    SELECT p.id, p.libelle, p.code_barres, p.marque, p.format, off.produit_id AS off_id,
+                           off.image_url, off.image_auteur
+                    FROM produit p
+                    LEFT JOIN produit_open_food_facts off ON off.produit_id = p.id
+                    WHERE true
+                    """ + FILTRES_SQL + filtreNutriScore(filtres));
+            requete.setString(1, filtres.marque());
+            requete.setString(2, filtres.marque());
+            requete.setString(3, filtres.format());
+            requete.setString(4, filtres.format());
+            if (!filtres.nutriScores().isEmpty()) {
+                requete.setString(5, filtres.cleNutriScores());
+            }
+            requete.setFetchSize(256);
+            return requete;
+        }, resultat -> {
+            consommateur.accept(lireProduit(resultat));
+        });
+    }
+
+    private static String filtreNutriScore(FiltresCatalogue filtres) {
+        return filtres.nutriScores().isEmpty() ? "" : " AND p.nutri_score = ANY(string_to_array(?, ',')) ";
+    }
+
+    private static void ajouterFiltres(List<Object> parametres, FiltresCatalogue filtres) {
+        parametres.add(filtres.marque());
+        parametres.add(filtres.marque());
+        parametres.add(filtres.format());
+        parametres.add(filtres.format());
+        if (!filtres.nutriScores().isEmpty()) {
+            parametres.add(filtres.cleNutriScores());
+        }
     }
 
     private ProduitCatalogue lireProduit(ResultSet resultat) throws SQLException {

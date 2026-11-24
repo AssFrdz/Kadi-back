@@ -11,7 +11,11 @@ public interface ProduitsCatalogueRepository {
 
     List<ProduitCatalogue> trouverApres(long dernierId, int limite, FiltresCatalogue filtres);
 
+    List<ProduitCatalogue> trouverParNom(String apresNom, long apresId, int limite, FiltresCatalogue filtres);
+
     List<ProduitCatalogue> presSelectionner(String recherche, int limite);
 
     void parcourirCandidats(String recherche, FiltresCatalogue filtres, Consumer<ProduitCatalogue> consommateur);
+
+    void parcourirCatalogue(FiltresCatalogue filtres, Consumer<ProduitCatalogue> consommateur);
 }
