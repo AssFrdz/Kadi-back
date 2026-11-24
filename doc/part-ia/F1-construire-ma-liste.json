@@ -1,0 +1,16 @@
+{
+  "titre": "Part IA par compétence — F1 Construire ma liste",
+  "commentaire": "Valeurs déclarées par la responsable de la feature. Bas niveau : remplacer null par la part IA (0 à 100), puis lancer python doc/outils/araignee.py doc/part-ia/F1-construire-ma-liste.json doc/part-ia/F1-construire-ma-liste.svg",
+  "axes": [
+    { "nom": "Code", "niveau": "bas", "ia": 85, "plafond": 70 },
+    { "nom": "Tests", "niveau": "bas", "ia": 70, "plafond": 60 },
+    { "nom": "CI/CD", "niveau": "bas", "ia": 80, "plafond": 80 },
+    { "nom": "Rédaction", "niveau": "bas", "ia": 70, "plafond": 70 },
+    { "nom": "Débogage", "niveau": "bas", "ia": 70, "plafond": 70 },
+    { "nom": "Validation", "niveau": "haut", "ia": 20, "plafond": 20 },
+    { "nom": "Algorithmique", "niveau": "haut", "ia": 30, "plafond": 30 },
+    { "nom": "Spécification", "niveau": "haut", "ia": 20, "plafond": 40 },
+    { "nom": "Conception", "niveau": "haut", "ia": 30, "plafond": 30 },
+    { "nom": "Idéation", "niveau": "haut", "ia": 10, "plafond": 30 }
+  ]
+}
