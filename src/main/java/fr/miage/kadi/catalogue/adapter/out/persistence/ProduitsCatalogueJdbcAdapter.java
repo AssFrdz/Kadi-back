@@ -60,7 +60,7 @@ class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
                 FROM produit p
                 LEFT JOIN produit_open_food_facts off ON off.produit_id = p.id
                 WHERE p.id > ?
-                """ + FILTRES_SQL + filtreNutriScore(filtres) + """
+                """ + FILTRES_SQL + """
                 ORDER BY p.id
                 LIMIT ?
                 """;
@@ -80,7 +80,7 @@ class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
                 FROM produit p
                 LEFT JOIN produit_open_food_facts off ON off.produit_id = p.id
                 WHERE true
-                """ + FILTRES_SQL + filtreNutriScore(filtres);
+                """ + FILTRES_SQL;
         if (apresNom != null) {
             sql += " AND (" + cle + ", p.id) > (" + CLE_NOM.formatted("?") + ", ?)";
         }
@@ -105,15 +105,12 @@ class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
     @Transactional(readOnly = true)
     public void parcourirCandidats(String recherche, FiltresCatalogue filtres, Consumer<ProduitCatalogue> consommateur) {
         jdbc.query(connexion -> {
-            PreparedStatement requete = connexion.prepareStatement(CANDIDATS_SQL + FILTRES_SQL + filtreNutriScore(filtres));
+            PreparedStatement requete = connexion.prepareStatement(CANDIDATS_SQL + FILTRES_SQL);
             requete.setString(1, recherche);
             requete.setString(2, filtres.marque());
             requete.setString(3, filtres.marque());
             requete.setString(4, filtres.format());
             requete.setString(5, filtres.format());
-            if (!filtres.nutriScores().isEmpty()) {
-                requete.setString(6, filtres.cleNutriScores());
-            }
             requete.setFetchSize(256);
             return requete;
         }, resultat -> {
@@ -131,14 +128,11 @@ class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
                     FROM produit p
                     LEFT JOIN produit_open_food_facts off ON off.produit_id = p.id
                     WHERE true
-                    """ + FILTRES_SQL + filtreNutriScore(filtres));
+                    """ + FILTRES_SQL);
             requete.setString(1, filtres.marque());
             requete.setString(2, filtres.marque());
             requete.setString(3, filtres.format());
             requete.setString(4, filtres.format());
-            if (!filtres.nutriScores().isEmpty()) {
-                requete.setString(5, filtres.cleNutriScores());
-            }
             requete.setFetchSize(256);
             return requete;
         }, resultat -> {
@@ -146,18 +140,11 @@ class ProduitsCatalogueJdbcAdapter implements ProduitsCatalogueRepository {
         });
     }
 
-    private static String filtreNutriScore(FiltresCatalogue filtres) {
-        return filtres.nutriScores().isEmpty() ? "" : " AND p.nutri_score = ANY(string_to_array(?, ',')) ";
-    }
-
     private static void ajouterFiltres(List<Object> parametres, FiltresCatalogue filtres) {
         parametres.add(filtres.marque());
         parametres.add(filtres.marque());
         parametres.add(filtres.format());
         parametres.add(filtres.format());
-        if (!filtres.nutriScores().isEmpty()) {
-            parametres.add(filtres.cleNutriScores());
-        }
     }
 
     private ProduitCatalogue lireProduit(ResultSet resultat) throws SQLException {

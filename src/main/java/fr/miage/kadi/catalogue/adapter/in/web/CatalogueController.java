@@ -8,11 +8,7 @@ import fr.miage.kadi.catalogue.application.service.RechercherCatalogueService.Pa
 import fr.miage.kadi.catalogue.application.service.RechercherCatalogueService.MarqueCatalogue;
 import fr.miage.kadi.catalogue.domain.model.ProduitCatalogue;
 import fr.miage.kadi.catalogue.domain.model.FiltresCatalogue;
-import fr.miage.kadi.catalogue.domain.model.NutriScore;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,22 +22,18 @@ class CatalogueController {
 
     private final ConsulterCatalogueService catalogue;
     private final RechercherCatalogueService recherche;
-    private final boolean nutriScoreActif;
 
-    CatalogueController(ConsulterCatalogueService catalogue, RechercherCatalogueService recherche,
-            @Value("${app.catalogue.nutri-score-actif:false}") boolean nutriScoreActif) {
+    CatalogueController(ConsulterCatalogueService catalogue, RechercherCatalogueService recherche) {
         this.catalogue = catalogue;
         this.recherche = recherche;
-        this.nutriScoreActif = nutriScoreActif;
     }
 
     @GetMapping("/par-nom")
     PageCatalogueParNom consulterParNom(@RequestParam(required = false) String apres,
             @RequestParam(required = false) String marque,
-            @RequestParam(required = false) String format,
-            @RequestParam(required = false) List<String> nutriScore) {
+            @RequestParam(required = false) String format) {
         try {
-            return catalogue.consulterParNom(apres, filtres(marque, format, nutriScore));
+            return catalogue.consulterParNom(apres, new FiltresCatalogue(marque, format));
         } catch (IllegalArgumentException erreur) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, erreur.getMessage(), erreur);
         }
@@ -50,13 +42,12 @@ class CatalogueController {
     @GetMapping
     PageCatalogue consulter(@RequestParam(defaultValue = "0") long apres,
             @RequestParam(required = false) String marque,
-            @RequestParam(required = false) String format,
-            @RequestParam(required = false) List<String> nutriScore) {
+            @RequestParam(required = false) String format) {
         if (apres < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "L'identifiant de pagination doit être positif ou nul.");
         }
         try {
-            return catalogue.consulter(apres, filtres(marque, format, nutriScore));
+            return catalogue.consulter(apres, new FiltresCatalogue(marque, format));
         } catch (IllegalArgumentException erreur) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, erreur.getMessage(), erreur);
         }
@@ -65,13 +56,12 @@ class CatalogueController {
     @GetMapping("/suggestions")
     List<ProduitCatalogue> suggerer(@RequestParam String q,
             @RequestParam(required = false) String marque,
-            @RequestParam(required = false) String format,
-            @RequestParam(required = false) List<String> nutriScore) {
+            @RequestParam(required = false) String format) {
         if (q.length() > 255) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La recherche ne peut pas dépasser 255 caractères.");
         }
         try {
-            return recherche.rechercherPage(q, null, 7, filtres(marque, format, nutriScore)).produits();
+            return recherche.rechercherPage(q, null, 7, new FiltresCatalogue(marque, format)).produits();
         } catch (IllegalArgumentException erreur) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, erreur.getMessage(), erreur);
         }
@@ -79,10 +69,9 @@ class CatalogueController {
 
     @GetMapping("/marques")
     List<MarqueCatalogue> marques(@RequestParam(defaultValue = "") String q,
-            @RequestParam(required = false) String format,
-            @RequestParam(required = false) List<String> nutriScore) {
+            @RequestParam(required = false) String format) {
         try {
-            return recherche.compterMarques(q, format, filtres(null, format, nutriScore).nutriScores());
+            return recherche.compterMarques(q, format);
         } catch (IllegalArgumentException erreur) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, erreur.getMessage(), erreur);
         }
@@ -93,33 +82,11 @@ class CatalogueController {
             @RequestParam(required = false) String apres,
             @RequestParam(defaultValue = "20") int taille,
             @RequestParam(required = false) String marque,
-            @RequestParam(required = false) String format,
-            @RequestParam(required = false) List<String> nutriScore) {
+            @RequestParam(required = false) String format) {
         try {
-            return recherche.rechercherPage(q, apres, taille, filtres(marque, format, nutriScore));
+            return recherche.rechercherPage(q, apres, taille, new FiltresCatalogue(marque, format));
         } catch (IllegalArgumentException erreur) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, erreur.getMessage(), erreur);
         }
-    }
-
-    private FiltresCatalogue filtres(String marque, String format, List<String> valeurs) {
-        Set<NutriScore> scores = EnumSet.noneOf(NutriScore.class);
-        if (valeurs != null) {
-            if (valeurs.isEmpty()) {
-                throw new IllegalArgumentException("La sélection Nutri-Score est invalide.");
-            }
-            for (String valeur : valeurs) {
-                try {
-                    scores.add(NutriScore.valueOf(valeur));
-                } catch (IllegalArgumentException erreur) {
-                    throw new IllegalArgumentException("Le Nutri-Score doit être A, B, C, D ou E.", erreur);
-                }
-            }
-        }
-        if (!scores.isEmpty() && !nutriScoreActif) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Le filtre Nutri-Score n'est pas disponible.");
-        }
-        return new FiltresCatalogue(marque, format, scores);
     }
 }

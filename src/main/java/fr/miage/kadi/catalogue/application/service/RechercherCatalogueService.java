@@ -4,7 +4,6 @@ import fr.miage.kadi.catalogue.application.port.out.ProduitsCatalogueRepository;
 import fr.miage.kadi.catalogue.domain.algo.SimilariteRecherche;
 import fr.miage.kadi.catalogue.domain.model.ProduitCatalogue;
 import fr.miage.kadi.catalogue.domain.model.FiltresCatalogue;
-import fr.miage.kadi.catalogue.domain.model.NutriScore;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -64,14 +63,10 @@ public class RechercherCatalogueService {
     }
 
     public List<MarqueCatalogue> compterMarques(String saisie, String format) {
-        return compterMarques(saisie, format, Set.of());
-    }
-
-    public List<MarqueCatalogue> compterMarques(String saisie, String format, Set<NutriScore> nutriScores) {
         if (saisie.length() > 255) {
             throw new IllegalArgumentException("La recherche ne peut pas dépasser 255 caractères.");
         }
-        FiltresCatalogue filtres = new FiltresCatalogue(null, format, nutriScores);
+        FiltresCatalogue filtres = new FiltresCatalogue(null, format);
         String recherche = SimilariteRecherche.normaliser(saisie);
         if (!saisie.isBlank() && recherche.codePointCount(0, recherche.length()) < 3) {
             return List.of();
@@ -115,9 +110,6 @@ public class RechercherCatalogueService {
                 sortie.writeDouble(resultat.score());
                 sortie.writeUTF(resultat.nomNormalise());
                 sortie.writeLong(resultat.id());
-                if (!filtres.nutriScores().isEmpty()) {
-                    sortie.writeUTF(filtres.cleNutriScores());
-                }
             }
             return Base64.getUrlEncoder().withoutPadding().encodeToString(octets.toByteArray());
         } catch (IOException erreur) {
@@ -137,9 +129,7 @@ public class RechercherCatalogueService {
             double score = entree.readDouble();
             String nom = entree.readUTF();
             long id = entree.readLong();
-            String nutriScores = entree.available() == 0 ? "" : entree.readUTF();
             if (!requete.equals(recherche) || !marque.equals(filtres.marque()) || !format.equals(filtres.format())
-                    || !nutriScores.equals(filtres.cleNutriScores())
                     || !Double.isFinite(score) || score < 0.5 || score > 1
                     || id < 1 || entree.available() != 0) {
                 throw new IllegalArgumentException("Curseur de recherche invalide.");

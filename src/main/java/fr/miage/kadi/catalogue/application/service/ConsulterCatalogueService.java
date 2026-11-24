@@ -50,9 +50,6 @@ public class ConsulterCatalogueService {
                 sortie.writeUTF(filtres.format());
                 sortie.writeUTF(produit.libelle());
                 sortie.writeLong(produit.id());
-                if (!filtres.nutriScores().isEmpty()) {
-                    sortie.writeUTF(filtres.cleNutriScores());
-                }
             }
             return Base64.getUrlEncoder().withoutPadding().encodeToString(octets.toByteArray());
         } catch (IOException erreur) {
@@ -70,9 +67,7 @@ public class ConsulterCatalogueService {
             String format = entree.readUTF();
             String nom = entree.readUTF();
             long id = entree.readLong();
-            String nutriScores = entree.available() == 0 ? "" : entree.readUTF();
             if (!marque.equals(filtres.marque()) || !format.equals(filtres.format()) || id < 1
-                    || !nutriScores.equals(filtres.cleNutriScores())
                     || nom.length() > 255 || entree.available() != 0) {
                 throw new IllegalArgumentException("Curseur du catalogue invalide.");
             }
