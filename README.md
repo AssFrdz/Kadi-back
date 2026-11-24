@@ -113,6 +113,8 @@ Une première évaluation reproductible (`EvaluationRechercheIT`, PostgreSQL iso
 
 Une seule liste par utilisateur simulé, créée au premier ajout. L'utilisateur vient de l'en-tête `X-Utilisateur-Id` (voir plus haut) ; une ligne d'un autre utilisateur répond `404`, exactement comme une ligne inexistante. Erreurs au format `application/problem+json`, avec un `detail` lisible par l'utilisateur.
 
+**Modération (administrateur).** La migration `V5__moderation_besoins.sql` relie une proposition validée au besoin générique commun. Routes réservées au profil « Admin Kadi » (`403` pour un consommateur) : `GET /api/v1/admin/besoins?statut=EN_ATTENTE|VALIDE|REFUSE`, `GET /api/v1/admin/besoins/generiques`, `POST /api/v1/admin/besoins/{id}/validation` avec `{"libelle":"…","nature":"SOLIDE|LIQUIDE|UNITAIRE"}` ou `{"besoinExistantId":…}`, et `POST /api/v1/admin/besoins/{id}/refus` (`409` si la proposition est déjà traitée). La liste de l’auteur garde sa saisie d’origine.
+
 | Route | Rôle |
 |---|---|
 | `GET /api/v1/liste` | `{ lignes: [...] }` dans l'ordre d'ajout. Chaque ligne : `id`, `type` (`PRODUIT`, `BESOIN_GENERIQUE`, `BESOIN_PERSONNALISE`), `referenceId`, `libelle` (connu à l'ajout), `marque` et `formatProduit` (produit précis), `quantite`, `unite`, `formatSouhaite`, `statutBesoin` (besoin personnel), `unitesAutorisees`. |
