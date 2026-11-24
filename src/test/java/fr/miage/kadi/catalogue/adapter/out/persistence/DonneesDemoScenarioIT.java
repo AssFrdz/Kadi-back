@@ -36,7 +36,6 @@ class DonneesDemoScenarioIT {
         new ResourceDatabasePopulator(
                 new ClassPathResource("db/migration/V1__modele_commun.sql"),
                 new ClassPathResource("db/migration/V4__comptes_utilisateur.sql"),
-                new ClassPathResource("db/migration/V5__moderation_besoins.sql"),
                 new ClassPathResource("db/demo/R__donnees_demo.sql"),
                 new ClassPathResource("db/demo/R__images_open_food_facts.sql"),
                 new ClassPathResource("db/demo/R__donnees_demo.sql"),

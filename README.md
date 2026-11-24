@@ -107,7 +107,7 @@ Une première évaluation reproductible (`EvaluationRechercheIT`, PostgreSQL iso
 
 Une seule liste par utilisateur simulé, créée au premier ajout. L'utilisateur vient de l'en-tête `X-Utilisateur-Id` (voir plus haut) ; une ligne d'un autre utilisateur répond `404`, exactement comme une ligne inexistante. Erreurs au format `application/problem+json`, avec un `detail` lisible par l'utilisateur.
 
-**Modération (administrateur).** La migration `V5__moderation_besoins.sql` relie une proposition validée au besoin générique commun. Routes réservées au profil « Admin Kadi » (`403` pour un consommateur) : `GET /api/v1/admin/besoins?statut=EN_ATTENTE|VALIDE|REFUSE`, `GET /api/v1/admin/besoins/generiques`, `POST /api/v1/admin/besoins/{id}/validation` avec `{"libelle":"…","nature":"SOLIDE|LIQUIDE|UNITAIRE"}` ou `{"besoinExistantId":…}`, et `POST /api/v1/admin/besoins/{id}/refus` (`409` si la proposition est déjà traitée). La liste de l’auteur garde sa saisie d’origine.
+**Modération (administrateur).** La V4 (colonnes `produit_id` et `modere_le` de `besoin_personnalise`) relie une proposition validée au besoin générique commun. Routes réservées au profil « Admin Kadi » (`403` pour un consommateur) : `GET /api/v1/admin/besoins?statut=EN_ATTENTE|VALIDE|REFUSE`, `GET /api/v1/admin/besoins/generiques`, `POST /api/v1/admin/besoins/{id}/validation` avec `{"libelle":"…","nature":"SOLIDE|LIQUIDE|UNITAIRE"}` ou `{"besoinExistantId":…}`, et `POST /api/v1/admin/besoins/{id}/refus` (`409` si la proposition est déjà traitée). La liste de l’auteur garde sa saisie d’origine.
 
 | Route | Rôle |
 |---|---|
@@ -133,7 +133,7 @@ Les suggestions de la liste utilisent `GET /api/v1/produits?recherche=...&portee
 
 ### Recréer sa base locale
 
-À faire une fois après la fusion des migrations en V4, si la base locale avait appliqué une ancienne version de V4 (y compris celle sans utilisateurs simulés) ou une V5 temporaire. Ces commandes suppriment les données de la base `kadi` locale (comptes de test et fiches importées) : la sauvegarde de l'étape 1 est indispensable.
+À faire une fois après la fusion des migrations en V4, si la base locale avait appliqué une ancienne version de V4 (y compris celle sans utilisateurs simulés) ou une V5 temporaire, dont `V5__moderation_besoins.sql`, fusionnée dans V4 le 24 novembre 2026. Ces commandes suppriment les données de la base `kadi` locale (comptes de test et fiches importées) : la sauvegarde de l'étape 1 est indispensable.
 
 ```powershell
 # 1. Sauvegarde dans le conteneur, puis copie hors du dépôt

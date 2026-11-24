@@ -1,5 +1,6 @@
 -- V4 (F1, Assia) : comptes (utilisateurs simulés), catalogue de recherche et liste de courses personnelle.
--- Regroupe l'ancienne V4 et les V5 temporaires (dont les utilisateurs simulés), jamais poussées sur develop.
+-- Regroupe l'ancienne V4 et les V5 temporaires (dont les utilisateurs simulés et la modération des besoins),
+-- jamais fusionnées dans develop.
 -- Une base locale ayant appliqué ces anciennes versions doit être sauvegardée puis recréée (voir le README).
 
 -- ---------------------------------------------------------------------------------------------
@@ -91,17 +92,25 @@ CREATE TABLE produit_open_food_facts (
 -- Liste de courses : une seule liste personnelle par compte
 -- ---------------------------------------------------------------------------------------------
 -- Besoin créé volontairement par son auteur. Il reste privé tant qu'un administrateur ne l'a pas validé.
+-- Modération (REQ-039 à REQ-043, REQ-047) : une proposition validée est reliée au besoin générique commun
+-- qu'elle a créé ou auquel elle a été rattachée (produit_id) ; la ligne de l'auteur garde sa saisie d'origine
+-- (ligne_liste.libelle_origine). modere_le date la décision de l'administrateur.
 CREATE TABLE besoin_personnalise (
     id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     compte_id  BIGINT NOT NULL REFERENCES compte_utilisateur (id) ON DELETE CASCADE,
     libelle    VARCHAR(255) NOT NULL,
     statut     VARCHAR(20) NOT NULL DEFAULT 'EN_ATTENTE',
     cree_le    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    produit_id BIGINT REFERENCES produit (id),
+    modere_le  TIMESTAMP WITH TIME ZONE,
     CONSTRAINT ck_besoin_personnalise_libelle_non_vide CHECK (length(trim(libelle)) > 0),
-    CONSTRAINT ck_besoin_personnalise_statut CHECK (statut IN ('EN_ATTENTE', 'VALIDE', 'REFUSE'))
+    CONSTRAINT ck_besoin_personnalise_statut CHECK (statut IN ('EN_ATTENTE', 'VALIDE', 'REFUSE')),
+    CONSTRAINT ck_besoin_valide_relie CHECK ((statut = 'VALIDE') = (produit_id IS NOT NULL)),
+    CONSTRAINT ck_besoin_modere_date CHECK ((statut = 'EN_ATTENTE') = (modere_le IS NULL))
 );
 
 CREATE UNIQUE INDEX uq_besoin_personnalise_compte_libelle ON besoin_personnalise (compte_id, lower(libelle));
+CREATE INDEX idx_besoin_personnalise_statut ON besoin_personnalise (statut);
 
 CREATE TABLE liste_courses (
     id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
