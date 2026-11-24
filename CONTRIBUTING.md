@@ -223,7 +223,7 @@ git push -u origin feature/12-account-creation
 - Dans la description, ajouter `Closes #12` (ferme l'issue après fusion).
 - Demander au minimum un relecteur.
 
-**Modèle de PR** : description des modifications, tests réalisés, impact éventuel, usage de l'IA, répartition de la part IA par compétence.
+**Modèles de PR** : utiliser `feature.md` pour une feature et `chore.md` pour une tâche technique. Lors de la création de la PR, ajouter `?template=feature.md` ou `?template=chore.md` à l'URL. Les modèles doivent être présents sur la branche par défaut.
 
 Une PR reste modifiable tant qu'elle n'est pas fusionnée : il suffit de pousser de nouveaux commits sur la même branche.
 
@@ -282,7 +282,9 @@ git branch -d <branche>
 
 ```text
 .github/
-├── PULL_REQUEST_TEMPLATE.md
+├── PULL_REQUEST_TEMPLATE/
+│   ├── feature.md
+│   └── chore.md
 └── ISSUE_TEMPLATE/
     ├── feature.yml
     └── bug.yml
